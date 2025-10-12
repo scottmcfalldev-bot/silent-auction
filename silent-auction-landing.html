@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silent Auction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .item-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .item-content {
+            padding: 20px;
+        }
+
+        .item-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .item-price {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .price-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-details {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-details:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .btn-bid {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-bid:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            background: none;
+            border: none;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+            padding-right: 40px;
+        }
+
+        .modal-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .modal-price {
+            font-size: 1.8rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Silent Auction 2025</h1>
+            <p>Bid on amazing items and support a great cause!</p>
+        </header>
+
+        <div class="loading-indicator" id="loadingIndicator">Loading current bids...</div>
+
+        <div class="items-grid" id="itemsGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <p class="modal-description" id="modalDescription"></p>
+            <div class="modal-price">
+                <span class="price-label">Current Bid: </span>
+                <span id="modalPrice"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION: Replace with your actual Google Apps Script Web App URL
+        const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+        
+        // Item data - Update this with your actual items
+        const items = [
+            {
+                id: 'item1',
+                name: 'Vintage Watch',
+                description: 'Beautiful vintage timepiece from the 1960s. Fully restored and in working condition. Comes with original box and certificate of authenticity.',
+                startingBid: 150,
+                imageUrl: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400',
+                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_1'
+            },
+            {
+                id: 'item2',
+                name: 'Signed Basketball',
+                description: 'Official NBA basketball signed by championship team. Authenticated with hologram certificate. Display case included.',
+                startingBid: 200,
+                imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400',
+                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_2'
+            },
+            {
+                id: 'item3',
+                name: 'Artwork Print',
+                description: 'Limited edition print by renowned local artist. Numbered and signed. Frame included. 24x36 inches.',
+                startingBid: 100,
+                imageUrl: 'https://images.unsplash.com/photo-1549887534-1541e9326642?w=400',
+                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_3'
+            },
+            {
+                id: 'item4',
+                name: 'Wine Collection',
+                description: 'Curated collection of 6 premium wines from Napa Valley. Includes tasting notes and pairing suggestions.',
+                startingBid: 250,
+                imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400',
+                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_4'
+            },
+            {
+                id: 'item5',
+                name: 'Golf Club Set',
+                description: 'Professional grade golf club set with bag. Lightly used, excellent condition. Perfect for enthusiasts.',
+                startingBid: 300,
+                imageUrl: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=400',
+                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_5'
+            },
+            {
+                id: 'item6',
+                name: 'Concert Tickets',
+                description: 'Two VIP tickets to upcoming concert with backstage meet and greet. Premium seating included.',
+                startingBid: 400,
+                imageUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
+                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_6'
+            }
+        ];
+
+        // Store current bids
+        let currentBids = {};
+
+        // Initialize the page
+        function init() {
+            renderItems();
+            fetchCurrentBids();
+            // Update bids every 30 seconds
+            setInterval(fetchCurrentBids, 30000);
+        }
+
+        // Render all items
+        function renderItems() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = items.map(item => `
+                <div class="item-card">
+                    <img src="${item.imageUrl}" alt="${item.name}" class="item-image">
+                    <div class="item-content">
+                        <div class="item-title">${item.name}</div>
+                        <div class="item-price">
+                            <span class="price-label">Current Bid: </span>
+                            <span id="price-${item.id}">$${item.startingBid}</span>
+                        </div>
+                        <div class="item-buttons">
+                            <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
+                            <a href="${item.bidFormUrl}" target="_blank" class="btn btn-bid">Bid Now</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Fetch current bids from Google Apps Script
+        async function fetchCurrentBids() {
+            // Skip if no Apps Script URL configured
+            if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const data = await response.json();
+                currentBids = data;
+                updatePrices();
+                document.getElementById('loadingIndicator').style.display = 'none';
+            } catch (error) {
+                console.error('Error fetching bids:', error);
+                document.getElementById('loadingIndicator').textContent = 'Using starting bids';
+                setTimeout(() => {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        // Update prices on the page
+        function updatePrices() {
+            items.forEach(item => {
+                const priceElement = document.getElementById(`price-${item.id}`);
+                if (priceElement) {
+                    const currentBid = currentBids[item.id] || item.startingBid;
+                    priceElement.textContent = `$${currentBid}`;
+                }
+            });
+        }
+
+        // Show item details modal
+        function showDetails(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('modalTitle').textContent = item.name;
+            document.getElementById('modalDescription').textContent = item.description;
+            const currentBid = currentBids[item.id] || item.startingBid;
+            document.getElementById('modalPrice').textContent = `$${currentBid}`;
+            document.getElementById('detailsModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailsModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
