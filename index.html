@@ -359,13 +359,13 @@
 
                 <div class="form-group">
                     <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" name="phone" required>
-                    <span class="error-message" id="phoneError">Please enter your phone number</span>
+                    <input type="tel" id="phone" name="phone" placeholder="555-123-4567 or 5551234567" required>
+                    <span class="error-message" id="phoneError">Please enter a valid phone number (at least 10 digits)</span>
                 </div>
 
                 <div class="form-group">
                     <label for="bidAmount">Bid Amount ($) *</label>
-                    <input type="number" id="bidAmount" name="bidAmount" min="1" step="1" required>
+                    <input type="number" id="bidAmount" name="bidAmount" min="1" step="1" placeholder="Enter whole dollar amount" required>
                     <span class="error-message" id="bidError">Please enter a valid bid amount</span>
                 </div>
 
@@ -546,6 +546,17 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
+        // Validate phone number (must be digits, at least 10 digits)
+        function isValidPhone(phone) {
+            const digitsOnly = phone.replace(/\D/g, '');
+            return digitsOnly.length >= 10;
+        }
+
+        // Validate name (at least 2 characters, letters and spaces only)
+        function isValidName(name) {
+            return name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
+        }
+
         // Handle form submission
         document.getElementById('bidForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -558,20 +569,25 @@
 
             let hasError = false;
 
-            // Validate inputs
-            if (!fullName) {
+            // Validate name
+            if (!fullName || !isValidName(fullName)) {
+                document.getElementById('nameError').textContent = 'Please enter a valid name (letters only, at least 2 characters)';
                 document.getElementById('nameError').style.display = 'block';
                 document.getElementById('fullName').classList.add('error');
                 hasError = true;
             }
 
+            // Validate email
             if (!email || !isValidEmail(email)) {
+                document.getElementById('emailError').textContent = 'Please enter a valid email address (must include @)';
                 document.getElementById('emailError').style.display = 'block';
                 document.getElementById('email').classList.add('error');
                 hasError = true;
             }
 
-            if (!phone) {
+            // Validate phone
+            if (!phone || !isValidPhone(phone)) {
+                document.getElementById('phoneError').textContent = 'Please enter a valid phone number (at least 10 digits)';
                 document.getElementById('phoneError').style.display = 'block';
                 document.getElementById('phone').classList.add('error');
                 hasError = true;
