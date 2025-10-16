@@ -142,6 +142,7 @@
             height: 100%;
             background: rgba(0,0,0,0.7);
             animation: fadeIn 0.3s ease;
+            overflow-y: auto;
         }
 
         @keyframes fadeIn {
@@ -206,6 +207,77 @@
             font-size: 1.8rem;
             color: #667eea;
             font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input.error {
+            border-color: #ff4444;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
         }
 
         .loading-indicator {
@@ -224,6 +296,11 @@
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
                 gap: 20px;
             }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -239,16 +316,61 @@
         <div class="items-grid" id="itemsGrid"></div>
     </div>
 
-    <!-- Modal -->
+    <!-- Details Modal -->
     <div id="detailsModal" class="modal">
         <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
             <h2 class="modal-title" id="modalTitle"></h2>
             <p class="modal-description" id="modalDescription"></p>
             <div class="modal-price">
                 <span class="price-label">Current Bid: </span>
                 <span id="modalPrice"></span>
             </div>
+        </div>
+    </div>
+
+    <!-- Bid Form Modal -->
+    <div id="bidModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeBidModal()">&times;</button>
+            <h2 class="modal-title">Place Your Bid</h2>
+            <p class="modal-description" id="bidItemName"></p>
+            <div class="modal-price">
+                <span class="price-label">Current Bid: </span>
+                <span id="bidCurrentPrice"></span>
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                🎉 Your bid has been submitted successfully!
+            </div>
+
+            <form id="bidForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                    <span class="error-message" id="nameError">Please enter your name</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                    <span class="error-message" id="emailError">Please enter a valid email</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                    <span class="error-message" id="phoneError">Please enter your phone number</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="bidAmount">Bid Amount ($) *</label>
+                    <input type="number" id="bidAmount" name="bidAmount" min="1" step="1" required>
+                    <span class="error-message" id="bidError">Please enter a valid bid amount</span>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Submit Bid</button>
+            </form>
         </div>
     </div>
 
@@ -261,10 +383,9 @@
             {
                 id: 'item1',
                 name: 'Ball',
-                description: 'Beautiful vintage timepiece from the 1960s. Fully restored and in working condition. Comes with original box and certificate of authenticity.',
-                startingBid: 150,
-                imageUrl: 'https://media.istockphoto.com/id/984792336/vector/soccer-ball-isolated-on-transparent-background-black-and-white-classic-leather-football-ball.jpg?s=612x612&w=0&k=20&c=bmWrt9c5BYp_yHKMsYQROzakV6hZrZoMuRl4e05Zk90=',
-                bidFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSe7Lgf74K_wZxLhA_jlqeip_I4L-fa5LWrMilbMGTi_dtDLoQ/viewform?usp=pp_url'
+                description: 'High-quality soccer ball, official size and weight. Perfect for games and practice.',
+                startingBid: 50,
+                imageUrl: 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=400',
             },
             {
                 id: 'item2',
@@ -272,7 +393,6 @@
                 description: 'Official NBA basketball signed by championship team. Authenticated with hologram certificate. Display case included.',
                 startingBid: 200,
                 imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400',
-                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_2'
             },
             {
                 id: 'item3',
@@ -280,7 +400,6 @@
                 description: 'Limited edition print by renowned local artist. Numbered and signed. Frame included. 24x36 inches.',
                 startingBid: 100,
                 imageUrl: 'https://images.unsplash.com/photo-1549887534-1541e9326642?w=400',
-                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_3'
             },
             {
                 id: 'item4',
@@ -288,7 +407,6 @@
                 description: 'Curated collection of 6 premium wines from Napa Valley. Includes tasting notes and pairing suggestions.',
                 startingBid: 250,
                 imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400',
-                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_4'
             },
             {
                 id: 'item5',
@@ -296,7 +414,6 @@
                 description: 'Professional grade golf club set with bag. Lightly used, excellent condition. Perfect for enthusiasts.',
                 startingBid: 300,
                 imageUrl: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=400',
-                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_5'
             },
             {
                 id: 'item6',
@@ -304,19 +421,19 @@
                 description: 'Two VIP tickets to upcoming concert with backstage meet and greet. Premium seating included.',
                 startingBid: 400,
                 imageUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
-                bidFormUrl: 'YOUR_PREFILLED_GOOGLE_FORM_URL_6'
             }
         ];
 
-        // Store current bids
+        // Store current bids and selected item
         let currentBids = {};
+        let selectedItem = null;
 
         // Initialize the page
         function init() {
             renderItems();
             fetchCurrentBids();
-            // Update bids every 30 seconds
-            setInterval(fetchCurrentBids, 30000);
+            // Update bids every 15 seconds
+            setInterval(fetchCurrentBids, 15000);
         }
 
         // Render all items
@@ -333,7 +450,7 @@
                         </div>
                         <div class="item-buttons">
                             <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
-                            <a href="${item.bidFormUrl}" target="_blank" class="btn btn-bid">Bid Now</a>
+                            <button class="btn btn-bid" onclick="showBidForm('${item.id}')">Bid Now</button>
                         </div>
                     </div>
                 </div>
@@ -342,14 +459,13 @@
 
         // Fetch current bids from Google Apps Script
         async function fetchCurrentBids() {
-            // Skip if no Apps Script URL configured
             if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
                 document.getElementById('loadingIndicator').style.display = 'none';
                 return;
             }
 
             try {
-                const response = await fetch(APPS_SCRIPT_URL);
+                const response = await fetch(APPS_SCRIPT_URL + '?action=getBids');
                 const data = await response.json();
                 currentBids = data;
                 updatePrices();
@@ -368,7 +484,7 @@
             items.forEach(item => {
                 const priceElement = document.getElementById(`price-${item.id}`);
                 if (priceElement) {
-                    const currentBid = currentBids[item.id] || item.startingBid;
+                    const currentBid = currentBids[item.name] || item.startingBid;
                     priceElement.textContent = `$${currentBid}`;
                 }
             });
@@ -381,21 +497,149 @@
 
             document.getElementById('modalTitle').textContent = item.name;
             document.getElementById('modalDescription').textContent = item.description;
-            const currentBid = currentBids[item.id] || item.startingBid;
+            const currentBid = currentBids[item.name] || item.startingBid;
             document.getElementById('modalPrice').textContent = `$${currentBid}`;
             document.getElementById('detailsModal').style.display = 'block';
         }
 
-        // Close modal
-        function closeModal() {
+        // Close details modal
+        function closeDetailsModal() {
             document.getElementById('detailsModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside
+        // Show bid form modal
+        function showBidForm(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+
+            selectedItem = item;
+            document.getElementById('bidItemName').textContent = `You are bidding on: ${item.name}`;
+            const currentBid = currentBids[item.name] || item.startingBid;
+            document.getElementById('bidCurrentPrice').textContent = `$${currentBid}`;
+            
+            // Set minimum bid amount
+            document.getElementById('bidAmount').min = currentBid + 1;
+            document.getElementById('bidAmount').placeholder = `Minimum: $${currentBid + 1}`;
+            
+            // Reset form
+            document.getElementById('bidForm').reset();
+            document.getElementById('successMessage').style.display = 'none';
+            clearErrors();
+            
+            document.getElementById('bidModal').style.display = 'block';
+        }
+
+        // Close bid modal
+        function closeBidModal() {
+            document.getElementById('bidModal').style.display = 'none';
+            selectedItem = null;
+        }
+
+        // Clear form errors
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+        }
+
+        // Validate email
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // Handle form submission
+        document.getElementById('bidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const bidAmount = parseInt(document.getElementById('bidAmount').value);
+
+            let hasError = false;
+
+            // Validate inputs
+            if (!fullName) {
+                document.getElementById('nameError').style.display = 'block';
+                document.getElementById('fullName').classList.add('error');
+                hasError = true;
+            }
+
+            if (!email || !isValidEmail(email)) {
+                document.getElementById('emailError').style.display = 'block';
+                document.getElementById('email').classList.add('error');
+                hasError = true;
+            }
+
+            if (!phone) {
+                document.getElementById('phoneError').style.display = 'block';
+                document.getElementById('phone').classList.add('error');
+                hasError = true;
+            }
+
+            const currentBid = currentBids[selectedItem.name] || selectedItem.startingBid;
+            if (!bidAmount || bidAmount <= currentBid) {
+                document.getElementById('bidError').style.display = 'block';
+                document.getElementById('bidError').textContent = `Bid must be greater than $${currentBid}`;
+                document.getElementById('bidAmount').classList.add('error');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            // Disable submit button
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                // Submit to Google Sheets
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'submitBid',
+                        fullName: fullName,
+                        email: email,
+                        phone: phone,
+                        bidAmount: bidAmount,
+                        itemName: selectedItem.name
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show success message
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('bidForm').style.display = 'none';
+                    
+                    // Refresh bids immediately
+                    await fetchCurrentBids();
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(() => {
+                        closeBidModal();
+                        document.getElementById('bidForm').style.display = 'block';
+                    }, 2000);
+                } else {
+                    alert('There was an error submitting your bid. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting bid:', error);
+                alert('There was an error submitting your bid. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Bid';
+            }
+        });
+
+        // Close modals when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('detailsModal');
-            if (event.target === modal) {
-                closeModal();
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
             }
         }
 
