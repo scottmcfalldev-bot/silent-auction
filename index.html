@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silent Auction - Secure Edition_V2</title>
+    <title>Silent Auction - Secure Edition_V3</title>
     <style>
         * {
             margin: 0;
@@ -108,6 +108,10 @@
             color: #667eea;
             font-weight: bold;
             margin-bottom: 15px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            transition: transform 0.2s ease;
         }
 
         .price-label {
@@ -395,6 +399,17 @@
             font-size: 0.9rem;
         }
 
+        /* Visual pulse when price changes */
+        .price-updated {
+            animation: pricePulse 700ms ease;
+        }
+
+        @keyframes pricePulse {
+            0% { transform: scale(1); color: #667eea; }
+            30% { transform: scale(1.06); color: #2b6cb0; }
+            100% { transform: scale(1); color: #667eea; }
+        }
+
         @media (max-width: 768px) {
             header h1 {
                 font-size: 2rem;
@@ -587,8 +602,8 @@
         // Initialize the page
         function init() {
             checkAuctionStatus();
-            renderItems();
-            fetchCurrentBids();
+            renderItems();         // render once
+            fetchCurrentBids();    // load initial bids
             // Update bids every 15 seconds
             setInterval(fetchCurrentBids, 15000);
             // Check auction status every minute
@@ -651,7 +666,7 @@
             return true;
         }
 
-        // Render all items
+        // Render all items (run once)
         function renderItems() {
             const grid = document.getElementById('itemsGrid');
             grid.innerHTML = items.map(item => {
@@ -668,7 +683,7 @@
                             <span class="price-label">Current Bid: </span>
                             <span id="price-${item.id}">$${currentBid}</span>
                         </div>
-                        <div class="bid-increment">Next minimum bid: $${minNextBid}</div>
+                        <div class="bid-increment" id="minbid-${item.id}">Next minimum bid: $${minNextBid}</div>
                         <div class="item-buttons">
                             <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
                             <button class="btn btn-bid" onclick="showBidForm('${item.id}')" 
@@ -681,6 +696,42 @@
             `}).join('');
         }
 
+        // Update only the bids that changed (no full re-render)
+        function updateBids(data) {
+            // If the grid is empty for some reason, re-render
+            if (!document.getElementById('itemsGrid').children.length) {
+                renderItems();
+            }
+
+            items.forEach(item => {
+                const newBid = data[item.name] ?? item.startingBid;
+                const priceEl = document.getElementById(`price-${item.id}`);
+                const minEl = document.getElementById(`minbid-${item.id}`);
+
+                // Update price text only when changed
+                if (priceEl) {
+                    const oldText = priceEl.textContent;
+                    const newText = `$${newBid}`;
+                    if (oldText !== newText) {
+                        priceEl.textContent = newText;
+                        // small visual highlight for change
+                        priceEl.classList.add('price-updated');
+                        setTimeout(() => priceEl.classList.remove('price-updated'), 700);
+                    }
+                }
+
+                // Update minimum next bid text if it exists and changed
+                if (minEl) {
+                    const increment = getMinimumBidIncrement(newBid);
+                    const minNext = newBid + increment;
+                    const minText = `Next minimum bid: $${minNext}`;
+                    if (minEl.textContent !== minText) {
+                        minEl.textContent = minText;
+                    }
+                }
+            });
+        }
+
         // Fetch current bids from Google Apps Script
         async function fetchCurrentBids() {
             if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
@@ -691,8 +742,10 @@
             try {
                 const response = await fetch(APPS_SCRIPT_URL + '?action=getBids');
                 const data = await response.json();
-                currentBids = data;
-                renderItems(); // Re-render to update prices and increments
+                // Keep a reference to prior bids if you want to compare or animate
+                currentBids = data || {};
+                // Update only what changed (no DOM wholesale replacement)
+                updateBids(currentBids);
                 document.getElementById('loadingIndicator').style.display = 'none';
             } catch (error) {
                 console.error('Error fetching bids:', error);
@@ -894,7 +947,6 @@
             pendingBidData = null;
         }
 
-        // Confirm and submit bid
        async function confirmAndSubmitBid() {
     const confirmBtn = document.getElementById('confirmBtn');
     confirmBtn.disabled = true;
