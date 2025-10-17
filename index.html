@@ -895,67 +895,73 @@
         }
 
         // Confirm and submit bid
-        async function confirmAndSubmitBid() {
-            const confirmBtn = document.getElementById('confirmBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = 'Submitting...';
+       async function confirmAndSubmitBid() {
+    const confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Submitting...';
 
-            try {
-                // Submit to Google Sheets with all security data
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        action: 'submitBid',
-                        bidId: pendingBidData.bidId,
-                        fullName: pendingBidData.fullName,
-                        email: pendingBidData.email,
-                        phone: pendingBidData.phone,
-                        bidAmount: pendingBidData.bidAmount,
-                        itemName: pendingBidData.itemName,
-                        userAgent: navigator.userAgent,
-                        timestamp: new Date().toISOString()
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Close confirmation modal
-                    document.getElementById('confirmModal').style.display = 'none';
-                    
-                    // Show success message in bid modal
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('bidForm').style.display = 'none';
-                    
-                    // Refresh bids immediately
-                    await fetchCurrentBids();
-                    
-                    // Close modal after 3 seconds
-                    setTimeout(() => {
-                        closeBidModal();
-                        document.getElementById('bidForm').style.display = 'block';
-                        document.getElementById('successMessage').style.display = 'none';
-                    }, 3000);
-                } else {
-                    // Show error message
-                    document.getElementById('confirmModal').style.display = 'none';
-                    document.getElementById('errorBanner').textContent = result.error || 'There was an error submitting your bid. Please try again.';
-                    document.getElementById('errorBanner').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error submitting bid:', error);
-                document.getElementById('confirmModal').style.display = 'none';
-                document.getElementById('errorBanner').textContent = 'Network error. Please check your connection and try again.';
-                document.getElementById('errorBanner').style.display = 'block';
-            } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = 'Confirm Bid';
-                pendingBidData = null;
-            }
-        }
+    // Create a form and submit it (works better with Google Apps Script)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = APPS_SCRIPT_URL;
+    form.target = 'hidden_iframe';
+    
+    // Add all the fields
+    const fields = {
+        action: 'submitBid',
+        bidId: pendingBidData.bidId,
+        fullName: pendingBidData.fullName,
+        email: pendingBidData.email,
+        phone: pendingBidData.phone,
+        bidAmount: pendingBidData.bidAmount.toString(),
+        itemName: pendingBidData.itemName,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+    };
+    
+    for (const [key, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    }
+    
+    // Create hidden iframe if it doesn't exist
+    let iframe = document.getElementById('hidden_iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.id = 'hidden_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    
+    // Submit the form
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    // Handle success (we assume it worked since we can't read the response)
+    setTimeout(() => {
+        document.getElementById('confirmModal').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('bidForm').style.display = 'none';
+        
+        // Refresh bids
+        fetchCurrentBids();
+        
+        setTimeout(() => {
+            closeBidModal();
+            document.getElementById('bidForm').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm Bid';
+        }, 3000);
+    }, 1000);
+    
+    pendingBidData = null;
+}
 
         // Close modals when clicking outside
         window.onclick = function(event) {
