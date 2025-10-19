@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silent Auction</title>
+    <title>Silent Auction - Secure Edition_V3</title>
     <style>
         * {
             margin: 0;
@@ -41,6 +41,20 @@
             opacity: 0.95;
         }
 
+        .auction-status {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .auction-status.closed {
+            background: rgba(255,67,54,0.8);
+        }
+
         .items-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -60,6 +74,15 @@
         .item-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .item-card.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .item-card.disabled:hover {
+            transform: none;
         }
 
         .item-image {
@@ -84,13 +107,23 @@
             font-size: 1.5rem;
             color: #667eea;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            transition: transform 0.2s ease;
         }
 
         .price-label {
             font-size: 0.9rem;
             color: #666;
             font-weight: normal;
+        }
+
+        .bid-increment {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 15px;
         }
 
         .item-buttons {
@@ -130,6 +163,12 @@
         .btn-bid:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-bid:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .modal {
@@ -239,6 +278,13 @@
             border-color: #ff4444;
         }
 
+        /* Hidden honeypot field for bot protection */
+        .website-field {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
+
         .error-message {
             color: #ff4444;
             font-size: 0.9rem;
@@ -246,7 +292,7 @@
             display: none;
         }
 
-        .submit-btn {
+        .submit-btn, .confirm-btn, .edit-btn {
             width: 100%;
             padding: 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -257,17 +303,27 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            margin-bottom: 10px;
         }
 
-        .submit-btn:hover {
+        .submit-btn:hover, .confirm-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .submit-btn:disabled {
+        .submit-btn:disabled, .confirm-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .edit-btn {
+            background: #6c757d;
+        }
+
+        .edit-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
         }
 
         .success-message {
@@ -280,11 +336,78 @@
             display: none;
         }
 
+        .error-banner {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .confirmation-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .confirmation-item:last-child {
+            border-bottom: none;
+        }
+
+        .confirmation-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .confirmation-value {
+            color: #212529;
+        }
+
+        .bid-amount-pill {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
         .loading-indicator {
             text-align: center;
             color: white;
             padding: 20px;
             font-size: 1.1rem;
+        }
+
+        .rate-limit-warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        /* Visual pulse when price changes */
+        .price-updated {
+            animation: pricePulse 700ms ease;
+        }
+
+        @keyframes pricePulse {
+            0% { transform: scale(1); color: #667eea; }
+            30% { transform: scale(1.06); color: #2b6cb0; }
+            100% { transform: scale(1); color: #667eea; }
         }
 
         @media (max-width: 768px) {
@@ -307,8 +430,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎯 Silent Auction 2025</h1>
+            <h1>🎯 Silent Auction 2025 v3.0</h1>
             <p>Bid on amazing items and support a great cause!</p>
+            <div class="auction-status" id="auctionStatus">Auction is OPEN</div>
         </header>
 
         <div class="loading-indicator" id="loadingIndicator">Loading current bids...</div>
@@ -341,48 +465,92 @@
             </div>
             
             <div class="success-message" id="successMessage">
-                🎉 Your bid has been submitted successfully!
+                🎉 Your bid has been submitted successfully! You will receive a confirmation email shortly.
+            </div>
+
+            <div class="error-banner" id="errorBanner"></div>
+
+            <div class="rate-limit-warning" id="rateLimitWarning">
+                ⚠️ You've submitted multiple bids recently. Please wait a moment before bidding again.
             </div>
 
             <form id="bidForm">
                 <div class="form-group">
                     <label for="fullName">Full Name *</label>
-                    <input type="text" id="fullName" name="fullName" required>
+                    <input type="text" id="fullName" name="fullName" maxlength="50" required>
                     <span class="error-message" id="nameError">Please enter your name</span>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" maxlength="100" required>
                     <span class="error-message" id="emailError">Please enter a valid email</span>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" name="phone" placeholder="555-123-4567 or 5551234567" required>
-                    <span class="error-message" id="phoneError">Please enter a valid phone number (at least 10 digits)</span>
+                    <input type="tel" id="phone" name="phone" placeholder="555-123-4567" required>
+                    <span class="error-message" id="phoneError">Please enter a valid phone number</span>
                 </div>
 
                 <div class="form-group">
                     <label for="bidAmount">Bid Amount ($) *</label>
-                    <input type="number" id="bidAmount" name="bidAmount" min="1" step="1" placeholder="Enter whole dollar amount" required>
+                    <input type="number" id="bidAmount" name="bidAmount" min="1" step="1" required>
                     <span class="error-message" id="bidError">Please enter a valid bid amount</span>
                 </div>
 
-                <button type="submit" class="submit-btn" id="submitBtn">Submit Bid</button>
+                <!-- Honeypot field for bot protection -->
+                <input type="text" name="website" class="website-field" tabindex="-1" autocomplete="off">
+
+                <button type="submit" class="submit-btn" id="submitBtn">Review Bid</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
+            <h2 class="modal-title">⚠️ Confirm Your Bid</h2>
+            <p class="modal-description">Please review your bid details carefully before confirming:</p>
+            
+            <div class="confirmation-section">
+                <div class="confirmation-item">
+                    <span class="confirmation-label">Item:</span>
+                    <span class="confirmation-value" id="confirmItemName"></span>
+                </div>
+                <div class="confirmation-item">
+                    <span class="confirmation-label">Your Email:</span>
+                    <span class="confirmation-value" id="confirmEmail"></span>
+                </div>
+                <div class="confirmation-item">
+                    <span class="confirmation-label">Your Bid:</span>
+                    <span class="bid-amount-pill" id="confirmBidAmount"></span>
+                </div>
+            </div>
+
+            <p style="color: #6c757d; font-size: 0.95rem; margin: 20px 0;">
+                ✉️ A confirmation email will be sent to the address shown above. 
+                Please verify it's correct before confirming.
+            </p>
+
+            <button class="confirm-btn" id="confirmBtn" onclick="confirmAndSubmitBid()">Confirm Bid</button>
+            <button class="edit-btn" onclick="editBid()">← Edit Bid</button>
         </div>
     </div>
 
     <script>
         // CONFIGURATION: Replace with your actual Google Apps Script Web App URL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_mFj3cKH_WcCpHjW08nIRJmRrSbmG85y5QwAKSScnSEzUYTYpb_v5Ojy7tdErjFEU/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ5sQVTqXfA738hSwUc2iviURQYPOT8npqt2ESfNlbKVZIIgkJXJocbKAkZNd5rOWnMw/exec';
+        
+        // Auction configuration
+        const AUCTION_END_TIME = new Date('2025-12-08T23:59:59'); // Set your auction end time
         
         // Item data - Update this with your actual items
         const items = [
             {
                 id: 'item1',
-                name: 'Ball',
+                name: 'Soccer Ball',
                 description: 'High-quality soccer ball, official size and weight. Perfect for games and practice.',
                 startingBid: 50,
                 imageUrl: 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=400',
@@ -399,7 +567,7 @@
                 name: 'Artwork Print',
                 description: 'Limited edition print by renowned local artist. Numbered and signed. Frame included. 24x36 inches.',
                 startingBid: 100,
-                imageUrl: 'https://images.unsplash.com/photo-1549887534-1541e9326642?w=400',
+                imageUrl: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=400',
             },
             {
                 id: 'item4',
@@ -427,34 +595,141 @@
         // Store current bids and selected item
         let currentBids = {};
         let selectedItem = null;
+        let pendingBidData = null;
+        let auctionIsOpen = true;
+        let bidSubmissions = [];
 
         // Initialize the page
         function init() {
-            renderItems();
-            fetchCurrentBids();
+            checkAuctionStatus();
+            renderItems();         // render once
+            fetchCurrentBids();    // load initial bids
             // Update bids every 15 seconds
             setInterval(fetchCurrentBids, 15000);
+            // Check auction status every minute
+            setInterval(checkAuctionStatus, 60000);
         }
 
-        // Render all items
+        // Check if auction is still open
+        function checkAuctionStatus() {
+            const now = new Date();
+            auctionIsOpen = now < AUCTION_END_TIME;
+            
+            const statusElement = document.getElementById('auctionStatus');
+            if (!auctionIsOpen) {
+                statusElement.textContent = 'Auction is CLOSED';
+                statusElement.classList.add('closed');
+                // Disable all bid buttons
+                document.querySelectorAll('.btn-bid').forEach(btn => {
+                    btn.disabled = true;
+                    btn.textContent = 'Auction Closed';
+                });
+            } else {
+                const timeLeft = Math.floor((AUCTION_END_TIME - now) / 1000 / 60 / 60);
+                if (timeLeft < 24) {
+                    statusElement.textContent = `Auction closes in ${timeLeft} hours`;
+                }
+            }
+        }
+
+        // Get minimum bid increment based on current bid
+        function getMinimumBidIncrement(currentBid) {
+            if (currentBid < 100) return 5;
+            if (currentBid < 500) return 10;
+            if (currentBid < 1000) return 25;
+            if (currentBid < 5000) return 50;
+            return 100;
+        }
+
+        // Generate unique bid ID
+        function generateBidId() {
+            return Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Check rate limiting (client-side)
+        function checkRateLimit(email) {
+            const now = Date.now();
+            const fiveMinutesAgo = now - (5 * 60 * 1000);
+            
+            // Clean old submissions
+            bidSubmissions = bidSubmissions.filter(sub => sub.time > fiveMinutesAgo);
+            
+            // Count submissions from this email
+            const recentSubmissions = bidSubmissions.filter(sub => sub.email === email);
+            
+            if (recentSubmissions.length >= 5) {
+                return false; // Rate limit exceeded
+            }
+            
+            // Add this submission
+            bidSubmissions.push({ email, time: now });
+            return true;
+        }
+
+        // Render all items (run once)
         function renderItems() {
             const grid = document.getElementById('itemsGrid');
-            grid.innerHTML = items.map(item => `
-                <div class="item-card">
+            grid.innerHTML = items.map(item => {
+                const currentBid = currentBids[item.name] || item.startingBid;
+                const increment = getMinimumBidIncrement(currentBid);
+                const minNextBid = currentBid + increment;
+                
+                return `
+                <div class="item-card ${!auctionIsOpen ? 'disabled' : ''}">
                     <img src="${item.imageUrl}" alt="${item.name}" class="item-image">
                     <div class="item-content">
                         <div class="item-title">${item.name}</div>
                         <div class="item-price">
                             <span class="price-label">Current Bid: </span>
-                            <span id="price-${item.id}">$${item.startingBid}</span>
+                            <span id="price-${item.id}">$${currentBid}</span>
                         </div>
+                        <div class="bid-increment" id="minbid-${item.id}">Next minimum bid: $${minNextBid}</div>
                         <div class="item-buttons">
                             <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
-                            <button class="btn btn-bid" onclick="showBidForm('${item.id}')">Bid Now</button>
+                            <button class="btn btn-bid" onclick="showBidForm('${item.id}')" 
+                                ${!auctionIsOpen ? 'disabled' : ''}>
+                                ${auctionIsOpen ? 'Bid Now' : 'Auction Closed'}
+                            </button>
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
+        }
+
+        // Update only the bids that changed (no full re-render)
+        function updateBids(data) {
+            // If the grid is empty for some reason, re-render
+            if (!document.getElementById('itemsGrid').children.length) {
+                renderItems();
+            }
+
+            items.forEach(item => {
+                const newBid = data[item.name] ?? item.startingBid;
+                const priceEl = document.getElementById(`price-${item.id}`);
+                const minEl = document.getElementById(`minbid-${item.id}`);
+
+                // Update price text only when changed
+                if (priceEl) {
+                    const oldText = priceEl.textContent;
+                    const newText = `$${newBid}`;
+                    if (oldText !== newText) {
+                        priceEl.textContent = newText;
+                        // small visual highlight for change
+                        priceEl.classList.add('price-updated');
+                        setTimeout(() => priceEl.classList.remove('price-updated'), 700);
+                    }
+                }
+
+                // Update minimum next bid text if it exists and changed
+                if (minEl) {
+                    const increment = getMinimumBidIncrement(newBid);
+                    const minNext = newBid + increment;
+                    const minText = `Next minimum bid: $${minNext}`;
+                    if (minEl.textContent !== minText) {
+                        minEl.textContent = minText;
+                    }
+                }
+            });
         }
 
         // Fetch current bids from Google Apps Script
@@ -467,8 +742,10 @@
             try {
                 const response = await fetch(APPS_SCRIPT_URL + '?action=getBids');
                 const data = await response.json();
-                currentBids = data;
-                updatePrices();
+                // Keep a reference to prior bids if you want to compare or animate
+                currentBids = data || {};
+                // Update only what changed (no DOM wholesale replacement)
+                updateBids(currentBids);
                 document.getElementById('loadingIndicator').style.display = 'none';
             } catch (error) {
                 console.error('Error fetching bids:', error);
@@ -477,17 +754,6 @@
                     document.getElementById('loadingIndicator').style.display = 'none';
                 }, 2000);
             }
-        }
-
-        // Update prices on the page
-        function updatePrices() {
-            items.forEach(item => {
-                const priceElement = document.getElementById(`price-${item.id}`);
-                if (priceElement) {
-                    const currentBid = currentBids[item.name] || item.startingBid;
-                    priceElement.textContent = `$${currentBid}`;
-                }
-            });
         }
 
         // Show item details modal
@@ -509,21 +775,32 @@
 
         // Show bid form modal
         function showBidForm(itemId) {
+            if (!auctionIsOpen) {
+                alert('Sorry, the auction has ended. No more bids can be placed.');
+                return;
+            }
+
             const item = items.find(i => i.id === itemId);
             if (!item) return;
 
             selectedItem = item;
-            document.getElementById('bidItemName').textContent = `You are bidding on: ${item.name}`;
             const currentBid = currentBids[item.name] || item.startingBid;
+            const increment = getMinimumBidIncrement(currentBid);
+            const minBid = currentBid + increment;
+
+            document.getElementById('bidItemName').textContent = `You are bidding on: ${item.name}`;
             document.getElementById('bidCurrentPrice').textContent = `$${currentBid}`;
             
-            // Set minimum bid amount
-            document.getElementById('bidAmount').min = currentBid + 1;
-            document.getElementById('bidAmount').placeholder = `Minimum: $${currentBid + 1}`;
+            // Set minimum bid amount with increment
+            const bidAmountField = document.getElementById('bidAmount');
+            bidAmountField.min = minBid;
+            bidAmountField.placeholder = `Minimum: $${minBid} (increment of $${increment})`;
             
             // Reset form
             document.getElementById('bidForm').reset();
             document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorBanner').style.display = 'none';
+            document.getElementById('rateLimitWarning').style.display = 'none';
             clearErrors();
             
             document.getElementById('bidModal').style.display = 'block';
@@ -543,35 +820,55 @@
 
         // Validate email
         function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email) && email.length <= 100 && !email.includes('<') && !email.includes('>');
         }
 
-        // Validate phone number (must be digits, at least 10 digits)
+        // Validate phone number (at least 10 digits)
         function isValidPhone(phone) {
             const digitsOnly = phone.replace(/\D/g, '');
-            return digitsOnly.length >= 10;
+            return digitsOnly.length >= 10 && digitsOnly.length <= 15;
         }
 
-        // Validate name (at least 2 characters, letters and spaces only)
+        // Validate name (2-50 chars, letters, spaces, hyphens, apostrophes)
         function isValidName(name) {
-            return name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
+            const re = /^[a-zA-Z\s\-']+$/;
+            return name.length >= 2 && name.length <= 50 && re.test(name);
         }
 
-        // Handle form submission
+        // Sanitize input to prevent injection
+        function sanitizeInput(input) {
+            if (typeof input === 'string') {
+                // Remove any characters that could start a formula in sheets
+                return input.replace(/^[=+\-@]/g, '').trim();
+            }
+            return input;
+        }
+
+        // Handle form submission - show confirmation
         document.getElementById('bidForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             clearErrors();
 
-            const fullName = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
+            // Check honeypot field (bot protection)
+            const honeypot = document.querySelector('input[name="website"]').value;
+            if (honeypot) {
+                // Bot detected - fake success
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(closeBidModal, 3000);
+                return;
+            }
+
+            const fullName = sanitizeInput(document.getElementById('fullName').value.trim());
+            const email = sanitizeInput(document.getElementById('email').value.trim().toLowerCase());
+            const phone = sanitizeInput(document.getElementById('phone').value.trim());
             const bidAmount = parseInt(document.getElementById('bidAmount').value);
 
             let hasError = false;
 
             // Validate name
             if (!fullName || !isValidName(fullName)) {
-                document.getElementById('nameError').textContent = 'Please enter a valid name (letters only, at least 2 characters)';
+                document.getElementById('nameError').textContent = 'Please enter a valid name (2-50 characters, letters only)';
                 document.getElementById('nameError').style.display = 'block';
                 document.getElementById('fullName').classList.add('error');
                 hasError = true;
@@ -579,7 +876,7 @@
 
             // Validate email
             if (!email || !isValidEmail(email)) {
-                document.getElementById('emailError').textContent = 'Please enter a valid email address (must include @)';
+                document.getElementById('emailError').textContent = 'Please enter a valid email address';
                 document.getElementById('emailError').style.display = 'block';
                 document.getElementById('email').classList.add('error');
                 hasError = true;
@@ -587,75 +884,144 @@
 
             // Validate phone
             if (!phone || !isValidPhone(phone)) {
-                document.getElementById('phoneError').textContent = 'Please enter a valid phone number (at least 10 digits)';
+                document.getElementById('phoneError').textContent = 'Please enter a valid phone number (10-15 digits)';
                 document.getElementById('phoneError').style.display = 'block';
                 document.getElementById('phone').classList.add('error');
                 hasError = true;
             }
 
+            // Validate bid amount with increment
             const currentBid = currentBids[selectedItem.name] || selectedItem.startingBid;
-            if (!bidAmount || bidAmount <= currentBid) {
+            const increment = getMinimumBidIncrement(currentBid);
+            const minBid = currentBid + increment;
+
+            if (!bidAmount || bidAmount < minBid || bidAmount > 1000000) {
                 document.getElementById('bidError').style.display = 'block';
-                document.getElementById('bidError').textContent = `Bid must be greater than $${currentBid}`;
+                if (bidAmount > 1000000) {
+                    document.getElementById('bidError').textContent = 'Bid amount too high (max $1,000,000)';
+                } else {
+                    document.getElementById('bidError').textContent = `Minimum bid is $${minBid} (increment of $${increment})`;
+                }
                 document.getElementById('bidAmount').classList.add('error');
                 hasError = true;
             }
 
             if (hasError) return;
 
-            // Disable submit button
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-
-            try {
-                // Submit to Google Sheets
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        action: 'submitBid',
-                        fullName: fullName,
-                        email: email,
-                        phone: phone,
-                        bidAmount: bidAmount,
-                        itemName: selectedItem.name
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Show success message
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('bidForm').style.display = 'none';
-                    
-                    // Refresh bids immediately
-                    await fetchCurrentBids();
-                    
-                    // Close modal after 2 seconds
-                    setTimeout(() => {
-                        closeBidModal();
-                        document.getElementById('bidForm').style.display = 'block';
-                    }, 2000);
-                } else {
-                    alert('There was an error submitting your bid. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error submitting bid:', error);
-                alert('There was an error submitting your bid. Please try again.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Bid';
+            // Check rate limiting
+            if (!checkRateLimit(email)) {
+                document.getElementById('rateLimitWarning').style.display = 'block';
+                return;
             }
+
+            // Store bid data and show confirmation
+            pendingBidData = {
+                bidId: generateBidId(),
+                fullName: fullName,
+                email: email,
+                phone: phone,
+                bidAmount: bidAmount,
+                itemName: selectedItem.name
+            };
+
+            showConfirmation();
         });
+
+        // Show confirmation modal
+        function showConfirmation() {
+            document.getElementById('confirmItemName').textContent = pendingBidData.itemName;
+            document.getElementById('confirmEmail').textContent = pendingBidData.email;
+            document.getElementById('confirmBidAmount').textContent = `$${pendingBidData.bidAmount}`;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        // Edit bid - go back to form
+        function editBid() {
+            document.getElementById('confirmModal').style.display = 'none';
+            // Form data is still there, user can edit
+        }
+
+        // Close confirmation modal
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            pendingBidData = null;
+        }
+
+       async function confirmAndSubmitBid() {
+    const confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Submitting...';
+
+    // Create a form and submit it (works better with Google Apps Script)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = APPS_SCRIPT_URL;
+    form.target = 'hidden_iframe';
+    
+    // Add all the fields
+    const fields = {
+        action: 'submitBid',
+        bidId: pendingBidData.bidId,
+        fullName: pendingBidData.fullName,
+        email: pendingBidData.email,
+        phone: pendingBidData.phone,
+        bidAmount: pendingBidData.bidAmount.toString(),
+        itemName: pendingBidData.itemName,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+    };
+    
+    for (const [key, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    }
+    
+    // Create hidden iframe if it doesn't exist
+    let iframe = document.getElementById('hidden_iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.id = 'hidden_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    
+    // Submit the form
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    // Handle success (we assume it worked since we can't read the response)
+    setTimeout(() => {
+        document.getElementById('confirmModal').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('bidForm').style.display = 'none';
+        
+        // Refresh bids
+        fetchCurrentBids();
+        
+        setTimeout(() => {
+            closeBidModal();
+            document.getElementById('bidForm').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm Bid';
+        }, 3000);
+    }, 1000);
+    
+    pendingBidData = null;
+}
 
         // Close modals when clicking outside
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
+                if (event.target.id === 'confirmModal') {
+                    pendingBidData = null;
+                }
             }
         }
 
