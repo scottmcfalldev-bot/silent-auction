@@ -126,6 +126,17 @@
             margin-bottom: 15px;
         }
 
+        .bidder-identifier {
+            font-size: 0.75rem;
+            color: #555;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
         .item-buttons {
             display: flex;
             gap: 10px;
@@ -641,6 +652,20 @@
             return 100;
         }
 
+        // Get phone identifier for display
+        function getPhoneIdentifier(bidData) {
+            if (!bidData || typeof bidData !== 'object' || !bidData.phone) {
+                return '';
+            }
+            const phone = bidData.phone;
+            const digitsOnly = phone.replace(/\D/g, '');
+            if (digitsOnly.length >= 4) {
+                const last4 = digitsOnly.slice(-4);
+                return `<div class="bidder-identifier">Top Bidder: ***-${last4}</div>`;
+            }
+            return '';
+        }
+
         // Generate unique bid ID
         function generateBidId() {
             return Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -670,9 +695,11 @@
         function renderItems() {
             const grid = document.getElementById('itemsGrid');
             grid.innerHTML = items.map(item => {
-                const currentBid = currentBids[item.name] || item.startingBid;
+                const bidData = currentBids[item.name];
+                const currentBid = bidData?.bidAmount || bidData || item.startingBid;
                 const increment = getMinimumBidIncrement(currentBid);
                 const minNextBid = currentBid + increment;
+                const phoneIdentifier = getPhoneIdentifier(bidData);
                 
                 return `
                 <div class="item-card ${!auctionIsOpen ? 'disabled' : ''}">
@@ -691,6 +718,7 @@
                                 ${auctionIsOpen ? 'Bid Now' : 'Auction Closed'}
                             </button>
                         </div>
+                        <div id="phone-${item.id}">${phoneIdentifier}</div>
                     </div>
                 </div>
             `}).join('');
@@ -704,9 +732,11 @@
             }
 
             items.forEach(item => {
-                const newBid = data[item.name] ?? item.startingBid;
+                const bidData = data[item.name];
+                const newBid = bidData?.bidAmount || bidData || item.startingBid;
                 const priceEl = document.getElementById(`price-${item.id}`);
                 const minEl = document.getElementById(`minbid-${item.id}`);
+                const phoneEl = document.getElementById(`phone-${item.id}`);
 
                 // Update price text only when changed
                 if (priceEl) {
@@ -727,6 +757,14 @@
                     const minText = `Next minimum bid: $${minNext}`;
                     if (minEl.textContent !== minText) {
                         minEl.textContent = minText;
+                    }
+                }
+
+                // Update phone identifier if it exists
+                if (phoneEl) {
+                    const phoneIdentifier = getPhoneIdentifier(bidData);
+                    if (phoneEl.innerHTML !== phoneIdentifier) {
+                        phoneEl.innerHTML = phoneIdentifier;
                     }
                 }
             });
@@ -763,7 +801,8 @@
 
             document.getElementById('modalTitle').textContent = item.name;
             document.getElementById('modalDescription').textContent = item.description;
-            const currentBid = currentBids[item.name] || item.startingBid;
+            const bidData = currentBids[item.name];
+            const currentBid = bidData?.bidAmount || bidData || item.startingBid;
             document.getElementById('modalPrice').textContent = `$${currentBid}`;
             document.getElementById('detailsModal').style.display = 'block';
         }
@@ -784,7 +823,8 @@
             if (!item) return;
 
             selectedItem = item;
-            const currentBid = currentBids[item.name] || item.startingBid;
+            const bidData = currentBids[item.name];
+            const currentBid = bidData?.bidAmount || bidData || item.startingBid;
             const increment = getMinimumBidIncrement(currentBid);
             const minBid = currentBid + increment;
 
@@ -891,7 +931,8 @@
             }
 
             // Validate bid amount with increment
-            const currentBid = currentBids[selectedItem.name] || selectedItem.startingBid;
+            const bidData = currentBids[selectedItem.name];
+            const currentBid = bidData?.bidAmount || bidData || selectedItem.startingBid;
             const increment = getMinimumBidIncrement(currentBid);
             const minBid = currentBid + increment;
 
