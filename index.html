@@ -784,17 +784,17 @@
                         const div = document.createElement('div');
                         div.className = 'bidder-identifier';
                         div.textContent = phoneData.text;
-                        phoneEl.innerHTML = '';
+                        phoneEl.textContent = ''; // Clear safely
                         phoneEl.appendChild(div);
                     } else if (phoneData && currentHasPhone) {
                         // Update existing phone identifier using textContent
                         const existingDiv = phoneEl.querySelector('.bidder-identifier');
-                        if (existingDiv.textContent !== phoneData.text) {
+                        if (existingDiv && existingDiv.textContent !== phoneData.text) {
                             existingDiv.textContent = phoneData.text;
                         }
                     } else if (!phoneData && currentHasPhone) {
                         // Remove phone identifier
-                        phoneEl.innerHTML = '';
+                        phoneEl.textContent = ''; // Clear safely
                     }
                 }
             });
