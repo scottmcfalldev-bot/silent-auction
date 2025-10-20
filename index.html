@@ -683,7 +683,7 @@
             const digitsOnly = phone.replace(/\D/g, '');
             if (digitsOnly.length >= 4) {
                 const last4 = digitsOnly.slice(-4);
-                const result = { text: `***-${last4}` };
+                const result = { text: `Highest Bidder: ${last4}` };
                 console.log('Returning phone identifier:', result);
                 return result;
             }
