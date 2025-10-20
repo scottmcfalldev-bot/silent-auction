@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - Phone Identifiers</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .test-card { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .bidder-identifier {
+            font-size: 0.75rem;
+            color: #555;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .btn { padding: 10px 20px; margin: 5px; border-radius: 5px; border: none; cursor: pointer; }
+        .btn-bid { background: #667eea; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Phone Identifier Test</h1>
+    <p>This page shows what the phone identifiers should look like when bid data is returned from the server.</p>
+    
+    <div class="test-card">
+        <h3>Item: Soccer Ball</h3>
+        <p><strong>Current Bid:</strong> $75</p>
+        <p><strong>Next minimum bid:</strong> $80</p>
+        <div class="bidder-identifier">***-4567</div>
+        <button class="btn btn-bid">Bid Now</button>
+    </div>
+
+    <div class="test-card">
+        <h3>Item: Basketball (No bids yet)</h3>
+        <p><strong>Current Bid:</strong> $200 (starting)</p>
+        <p><strong>Next minimum bid:</strong> $205</p>
+        <!-- No phone identifier shown -->
+        <button class="btn btn-bid">Bid Now</button>
+    </div>
+
+    <div class="test-card">
+        <h3>Item: Artwork Print</h3>
+        <p><strong>Current Bid:</strong> $150</p>
+        <p><strong>Next minimum bid:</strong> $160</p>
+        <div class="bidder-identifier">***-8901</div>
+        <button class="btn btn-bid">Bid Now</button>
+    </div>
+
+    <hr>
+    <h2>Simulated Server Response:</h2>
+    <pre style="background: #333; color: #0f0; padding: 15px; border-radius: 5px; overflow-x: auto;">
+{
+  "Soccer Ball": {
+    "bidAmount": 75,
+    "phone": "555-123-4567",
+    "fullName": "John Doe",
+    "timestamp": "2025-10-19T10:30:00"
+  },
+  "Artwork Print": {
+    "bidAmount": 150,
+    "phone": "(555) 987-8901",
+    "fullName": "Jane Smith",
+    "timestamp": "2025-10-19T11:45:00"
+  }
+}
+    </pre>
+
+    <p><strong>Expected behavior:</strong></p>
+    <ul>
+        <li>✅ Items with bids should show "***-XXXX" where XXXX is the last 4 digits of the bidder's phone</li>
+        <li>✅ Items without bids yet should NOT show any phone identifier</li>
+        <li>✅ The phone identifier should appear above the bid buttons</li>
+        <li>✅ It should have a gray background and rounded corners</li>
+    </ul>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silent Auction - Secure Edition_V3</title>
+    <title>LSH Silent Auction</title>
     <style>
         * {
             margin: 0;
@@ -127,14 +127,17 @@
         }
 
         .bidder-identifier {
-            font-size: 0.75rem;
-            color: #555;
-            background: #f0f0f0;
-            padding: 4px 12px;
-            border-radius: 12px;
-            display: inline-block;
-            margin-bottom: 10px;
-            font-weight: 500;
+            font-size: 1.2rem;
+            color: white;
+            background: red;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: block;
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+            border: 3px solid darkred;
+            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
         }
 
         .item-buttons {
@@ -441,7 +444,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎯 Silent Auction 2025 v4.0_phone ident</h1>
+            <h1>LSH Silent Auction 2025</h1>
             <p>Bid on amazing items and support a great cause!</p>
             <div class="auction-status" id="auctionStatus">Auction is OPEN</div>
         </header>
@@ -552,7 +555,8 @@
 
     <script>
         // CONFIGURATION: Replace with your actual Google Apps Script Web App URL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ5sQVTqXfA738hSwUc2iviURQYPOT8npqt2ESfNlbKVZIIgkJXJocbKAkZNd5rOWnMw/exec';
+        // IMPORTANT: Use the /exec URL, NOT the googleusercontent.com URL!
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywQJkfZjWudhqoNatVWvAFWOwz8ZvDH-LzWZM1bpt4zUWIomgJg9lFcLeCa2OV3imq-w/exec';
         
         // Auction configuration
         const AUCTION_END_TIME = new Date('2025-12-08T23:59:59'); // Set your auction end time
@@ -656,7 +660,7 @@
         function getBidAmount(bidData, defaultValue) {
             if (!bidData) return defaultValue;
             if (typeof bidData === 'object' && bidData.bidAmount !== undefined) {
-                return bidData.bidAmount;
+                return Number(bidData.bidAmount);
             }
             if (typeof bidData === 'number') {
                 return bidData;
@@ -666,16 +670,25 @@
 
         // Get phone identifier for display (returns object with text or null)
         function getPhoneIdentifier(bidData) {
-            if (!bidData || typeof bidData !== 'object' || !bidData.phone) {
+            console.log('getPhoneIdentifier called with:', bidData);
+            if (!bidData || typeof bidData !== 'object') {
+                console.log('No bidData or not an object');
+                return null;
+            }
+            if (!bidData.phone) {
+                console.log('No phone field in bidData');
                 return null;
             }
             const phone = String(bidData.phone);
+            console.log('Phone number:', phone);
             const digitsOnly = phone.replace(/\D/g, '');
             if (digitsOnly.length >= 4) {
                 const last4 = digitsOnly.slice(-4);
-                // Return sanitized text only
-                return { text: `Top Bidder: ***-${last4}` };
+                const result = { text: `***-${last4}` };
+                console.log('Returning phone identifier:', result);
+                return result;
             }
+            console.log('Not enough digits in phone');
             return null;
         }
 
@@ -713,7 +726,16 @@
                 const increment = getMinimumBidIncrement(currentBid);
                 const minNextBid = currentBid + increment;
                 const phoneData = getPhoneIdentifier(bidData);
-                const phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
+                
+                // TEMPORARY: Always show a test box for the first item
+                let phoneHtml = '';
+                if (item.id === 'item1') {
+                    phoneHtml = `<div class="bidder-identifier" style="background: red !important; color: white !important; padding: 20px !important; font-size: 1.5rem !important; margin: 20px 0 !important; display: block !important; border: 5px solid darkred !important;">🔴 TEST: ***-1234 🔴</div>`;
+                } else {
+                    phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
+                }
+                
+                console.log(`Rendering ${item.name}: phoneData=${phoneData}, phoneHtml length=${phoneHtml.length}`);
                 
                 return `
                 <div class="item-card ${!auctionIsOpen ? 'disabled' : ''}">
@@ -725,6 +747,7 @@
                             <span id="price-${item.id}">$${currentBid}</span>
                         </div>
                         <div class="bid-increment" id="minbid-${item.id}">Next minimum bid: $${minNextBid}</div>
+                        <div id="phone-${item.id}" style="margin-bottom: 10px;">${phoneHtml}</div>
                         <div class="item-buttons">
                             <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
                             <button class="btn btn-bid" onclick="showBidForm('${item.id}')" 
@@ -732,7 +755,6 @@
                                 ${auctionIsOpen ? 'Bid Now' : 'Auction Closed'}
                             </button>
                         </div>
-                        <div id="phone-${item.id}">${phoneHtml}</div>
                     </div>
                 </div>
             `}).join('');
@@ -779,23 +801,31 @@
                     const phoneData = getPhoneIdentifier(bidData);
                     const currentHasPhone = phoneEl.querySelector('.bidder-identifier') !== null;
                     
+                    // Debug logging
+                    console.log(`📱 Checking ${item.name}: bidData=`, bidData, 'phoneData=', phoneData, 'currentHasPhone=', currentHasPhone);
+                    
                     if (phoneData && !currentHasPhone) {
                         // Add phone identifier
                         const div = document.createElement('div');
                         div.className = 'bidder-identifier';
                         div.textContent = phoneData.text;
-                        phoneEl.textContent = ''; // Clear safely
+                        phoneEl.innerHTML = ''; // Clear safely
                         phoneEl.appendChild(div);
+                        console.log(`✅ Added phone identifier for ${item.name}`);
                     } else if (phoneData && currentHasPhone) {
                         // Update existing phone identifier using textContent
                         const existingDiv = phoneEl.querySelector('.bidder-identifier');
                         if (existingDiv && existingDiv.textContent !== phoneData.text) {
                             existingDiv.textContent = phoneData.text;
+                            console.log(`🔄 Updated phone identifier for ${item.name}`);
                         }
-                    } else if (!phoneData && currentHasPhone) {
-                        // Remove phone identifier
-                        phoneEl.textContent = ''; // Clear safely
+                    } else if (!phoneData && currentHasPhone && bidData) {
+                        // ONLY remove if we have bidData but no phone (meaning server said no phone)
+                        // Don't remove if bidData is undefined (server hasn't responded yet)
+                        phoneEl.innerHTML = ''; // Clear safely
+                        console.log(`❌ Removed phone identifier for ${item.name} (server has bid but no phone)`);
                     }
+                    // If !phoneData && !bidData, do nothing (keep whatever is there from initial render)
                 }
             });
         }
@@ -810,6 +840,11 @@
             try {
                 const response = await fetch(APPS_SCRIPT_URL + '?action=getBids');
                 const data = await response.json();
+                
+                // Debug logging
+                console.log('📊 Bid data received:', data);
+                console.log('📊 Number of items with bids:', Object.keys(data).length);
+                
                 // Keep a reference to prior bids if you want to compare or animate
                 currentBids = data || {};
                 // Update only what changed (no DOM wholesale replacement)
