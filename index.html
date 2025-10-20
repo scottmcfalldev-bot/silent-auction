@@ -127,17 +127,16 @@
         }
 
         .bidder-identifier {
-            font-size: 1.2rem;
-            color: white;
-            background: red;
-            padding: 15px 25px;
-            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #333;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
             display: block;
-            margin: 15px 0;
-            font-weight: bold;
+            margin-top: 10px;
+            font-weight: 500;
             text-align: center;
-            border: 3px solid darkred;
-            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
+            border: 1px solid #ddd;
         }
 
         .item-buttons {
@@ -727,13 +726,8 @@
                 const minNextBid = currentBid + increment;
                 const phoneData = getPhoneIdentifier(bidData);
                 
-                // TEMPORARY: Always show a test box for the first item
-                let phoneHtml = '';
-                if (item.id === 'item1') {
-                    phoneHtml = `<div class="bidder-identifier" style="background: red !important; color: white !important; padding: 20px !important; font-size: 1.5rem !important; margin: 20px 0 !important; display: block !important; border: 5px solid darkred !important;">🔴 TEST: ***-1234 🔴</div>`;
-                } else {
-                    phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
-                }
+                // Show phone identifier if available
+                const phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
                 
                 console.log(`Rendering ${item.name}: phoneData=${phoneData}, phoneHtml length=${phoneHtml.length}`);
                 
@@ -747,7 +741,6 @@
                             <span id="price-${item.id}">$${currentBid}</span>
                         </div>
                         <div class="bid-increment" id="minbid-${item.id}">Next minimum bid: $${minNextBid}</div>
-                        <div id="phone-${item.id}" style="margin-bottom: 10px;">${phoneHtml}</div>
                         <div class="item-buttons">
                             <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
                             <button class="btn btn-bid" onclick="showBidForm('${item.id}')" 
@@ -755,6 +748,7 @@
                                 ${auctionIsOpen ? 'Bid Now' : 'Auction Closed'}
                             </button>
                         </div>
+                        <div id="phone-${item.id}">${phoneHtml}</div>
                     </div>
                 </div>
             `}).join('');
