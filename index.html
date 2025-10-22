@@ -990,16 +990,19 @@
                 hasError = true;
             }
 
-            // Validate bid amount with increment
+            // Validate bid amount with increment and maximum bid difference
             const bidData = currentBids[selectedItem.name];
             const currentBid = getBidAmount(bidData, selectedItem.startingBid);
             const increment = getMinimumBidIncrement(currentBid);
             const minBid = currentBid + increment;
+            const maxBid = currentBid + 100; // Maximum $100 above current bid
 
-            if (!bidAmount || bidAmount < minBid || bidAmount > 1000000) {
+            if (!bidAmount || bidAmount < minBid || bidAmount > 1000000 || bidAmount > maxBid) {
                 document.getElementById('bidError').style.display = 'block';
                 if (bidAmount > 1000000) {
                     document.getElementById('bidError').textContent = 'Bid amount too high (max $1,000,000)';
+                } else if (bidAmount > maxBid) {
+                    document.getElementById('bidError').textContent = `Maximum bid cannot exceed $${maxBid} (current bid + $100)`;
                 } else {
                     document.getElementById('bidError').textContent = `Minimum bid is $${minBid} (increment of $${increment})`;
                 }
