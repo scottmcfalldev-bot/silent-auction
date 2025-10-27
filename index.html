@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #1a2a4e 0%, #0d1b3a 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #ecefd0 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -38,7 +38,7 @@
 
         header {
             text-align: center;
-            color: white;
+            color: #697D83;
             padding: 20px 20px 40px;
             margin-bottom: 40px;
         }
@@ -46,25 +46,25 @@
         header h1 {
             font-size: 3rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             font-weight: 700;
-            color: #00d9ff;
+            color: #6E8348;
         }
 
         header p {
             font-size: 1.2rem;
             opacity: 0.95;
+            color: #697D83;
         }
 
         .auction-status {
-            background: rgba(0, 217, 255, 0.2);
-            color: #00d9ff;
+            background: rgba(229, 159, 43, 0.2);
+            color: #E59F2B;
             padding: 10px 20px;
             border-radius: 25px;
             display: inline-block;
             margin-top: 15px;
             font-weight: 600;
-            font-weight: bold;
         }
 
         .auction-status.closed {
@@ -121,7 +121,7 @@
 
         .item-price {
             font-size: 1.5rem;
-            color: #00d9ff;
+            color: #6E8348;
             font-weight: 700;
             margin-bottom: 15px;
             display: flex;
@@ -185,14 +185,14 @@
         }
 
         .btn-bid {
-            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
-            color: #1a2a4e;
+            background: linear-gradient(135deg, #6E8348 0%, #5a6b3a 100%);
+            color: white;
             font-weight: 600;
         }
 
         .btn-bid:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(110, 131, 72, 0.4);
         }
 
         .btn-bid:disabled {
@@ -325,8 +325,8 @@
         .submit-btn, .confirm-btn, .edit-btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
-            color: #1a2a4e;
+            background: linear-gradient(135deg, #E59F2B 0%, #d18a1f 100%);
+            color: white;
             border: none;
             border-radius: 8px;
             font-size: 1.1rem;
@@ -338,7 +338,7 @@
 
         .submit-btn:hover, .confirm-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(229, 159, 43, 0.4);
         }
 
         .submit-btn:disabled, .confirm-btn:disabled {
@@ -404,8 +404,8 @@
         }
 
         .bid-amount-pill {
-            background: #00d9ff;
-            color: #1a2a4e;
+            background: #E59F2B;
+            color: white;
             padding: 8px 20px;
             border-radius: 25px;
             font-weight: 600;
@@ -436,9 +436,9 @@
         }
 
         @keyframes pricePulse {
-            0% { transform: scale(1); color: #00d9ff; }
-            30% { transform: scale(1.06); color: #00b8d4; }
-            100% { transform: scale(1); color: #00d9ff; }
+            0% { transform: scale(1); color: #6E8348; }
+            30% { transform: scale(1.06); color: #5a6b3a; }
+            100% { transform: scale(1); color: #6E8348; }
         }
 
         @media (max-width: 768px) {
