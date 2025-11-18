@@ -57,6 +57,15 @@
             color: #697D83;
         }
 
+        .phone-explanation {
+            text-align: center;
+            color: #ef5a87;
+            margin-top: 15px;
+            font-weight: 700;
+            font-size: 1.75rem;
+            font-style: italic;
+        }
+
         .auction-status {
             background: rgba(229, 159, 43, 0.2);
             color: #E59F2B;
@@ -578,11 +587,16 @@
             <h1>LSH Silent Auction 2025</h1>
             <p>Bid on amazing items and support a great cause!</p>
             <div class="auction-status" id="auctionStatus">Auction is OPEN</div>
+            <p class="phone-explanation">The last 4 digits of the highest bidder's phone number are shown with each item.</p>
         </header>
 
-        <div class="loading-indicator" id="loadingIndicator">Loading current bids...</div>
+        <div class="loading-indicator" id="loadingIndicator" style="display: none;">Loading current bids...</div>
 
-        <p style="text-align: center; color: #697D83; margin-bottom: 50px; font-size: 1.8rem; font-style: italic;">The last 4 digits of the highest bidder's phone number are shown with each item.</p>
+        <div style="max-width: 900px; margin: 0 auto 50px; padding: 20px; background: #fff3cd; border-left: 4px solid #E59F2B; border-radius: 8px;">
+            <p style="color: #856404; line-height: 1.6; margin: 0; font-size: 0.95rem;">
+                <strong>Important:</strong> All funds raised goes toward the Lucy S. Herring Elementary Parent Team initiatives including teacher appreciation, teacher mini-grants, class field trips, and other school needs. Highest bidders will be notified at close of auction on December 7, 2025 and will be sent official communication from the Lucy S. Herring Parent Team on how to remit payment for their item(s) online. Payment must be made before the item is available to be received. If it's a physical item, the winner must be in or come to the Asheville-area to retrieve the item, all to be coordinated after payment is received. Thanks and please reach out to Mindy Smith at <a href="mailto:herringparentteam@gmail.com" style="color: #856404; text-decoration: underline;">herringparentteam@gmail.com</a> with any questions.
+            </p>
+        </div>
 
         <div class="items-grid" id="itemsGrid"></div>
     </div>
