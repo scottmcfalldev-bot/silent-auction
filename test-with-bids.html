@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silent Auction - TEST with Mock Bids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .test-banner {
+            background: #ff9800;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .item-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .item-content {
+            padding: 20px;
+        }
+
+        .item-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .item-price {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .price-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .bid-increment {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .bidder-identifier {
+            font-size: 0.75rem;
+            color: #555;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-details {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-bid {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Silent Auction - TEST MODE</h1>
+            <p>This page shows what the auction will look like WITH bids</p>
+        </header>
+
+        <div class="test-banner">
+            ⚠️ TEST MODE: This page uses mock bid data to demonstrate phone identifier display
+        </div>
+
+        <div class="items-grid" id="itemsGrid"></div>
+    </div>
+
+    <script>
+        // Mock bid data - simulates what Google Apps Script would return
+        const mockBidData = {
+            'Soccer Ball': {
+                bidAmount: 75,
+                phone: '555-123-4567',
+                fullName: 'John Doe',
+                timestamp: new Date()
+            },
+            'Signed Basketball': {
+                bidAmount: 350,
+                phone: '555-987-6543',
+                fullName: 'Jane Smith',
+                timestamp: new Date()
+            },
+            'Artwork Print': {
+                bidAmount: 125,
+                phone: '555-111-2222',
+                fullName: 'Bob Johnson',
+                timestamp: new Date()
+            }
+            // Note: Wine Collection, Golf Club Set, and Concert Tickets have no bids yet
+        };
+
+        const items = [
+            {
+                id: 'item1',
+                name: 'Soccer Ball',
+                startingBid: 50,
+                imageUrl: 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=400',
+            },
+            {
+                id: 'item2',
+                name: 'Signed Basketball',
+                startingBid: 200,
+                imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400',
+            },
+            {
+                id: 'item3',
+                name: 'Artwork Print',
+                startingBid: 100,
+                imageUrl: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=400',
+            },
+            {
+                id: 'item4',
+                name: 'Wine Collection',
+                startingBid: 250,
+                imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400',
+            },
+            {
+                id: 'item5',
+                name: 'Golf Club Set',
+                startingBid: 300,
+                imageUrl: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=400',
+            },
+            {
+                id: 'item6',
+                name: 'Concert Tickets',
+                startingBid: 400,
+                imageUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
+            }
+        ];
+
+        function getBidAmount(bidData, defaultValue) {
+            if (!bidData) return defaultValue;
+            if (typeof bidData === 'object' && bidData.bidAmount !== undefined) {
+                return bidData.bidAmount;
+            }
+            return defaultValue;
+        }
+
+        function getPhoneIdentifier(bidData) {
+            if (!bidData || typeof bidData !== 'object' || !bidData.phone) {
+                return null;
+            }
+            const phone = String(bidData.phone);
+            const digitsOnly = phone.replace(/\D/g, '');
+            if (digitsOnly.length >= 4) {
+                const last4 = digitsOnly.slice(-4);
+                return { text: `Top Bidder: ***-${last4}` };
+            }
+            return null;
+        }
+
+        function getMinimumBidIncrement(currentBid) {
+            if (currentBid < 100) return 5;
+            if (currentBid < 500) return 10;
+            if (currentBid < 1000) return 25;
+            if (currentBid < 5000) return 50;
+            return 100;
+        }
+
+        function renderItems() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = items.map(item => {
+                const bidData = mockBidData[item.name];
+                const currentBid = getBidAmount(bidData, item.startingBid);
+                const increment = getMinimumBidIncrement(currentBid);
+                const minNextBid = currentBid + increment;
+                const phoneData = getPhoneIdentifier(bidData);
+                const phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
+                
+                // Add visual indicator for items with/without bids
+                const statusIndicator = bidData 
+                    ? '✅ HAS BID' 
+                    : '⏳ NO BIDS YET';
+                
+                return `
+                <div class="item-card">
+                    <img src="${item.imageUrl}" alt="${item.name}" class="item-image">
+                    <div class="item-content">
+                        <div class="item-title">${item.name}</div>
+                        <div style="font-size: 0.8rem; color: ${bidData ? '#4CAF50' : '#999'}; margin-bottom: 10px;">
+                            ${statusIndicator}
+                        </div>
+                        <div class="item-price">
+                            <span class="price-label">Current Bid: </span>
+                            <span>$${currentBid}</span>
+                        </div>
+                        <div class="bid-increment">Next minimum bid: $${minNextBid}</div>
+                        <div class="item-buttons">
+                            <button class="btn btn-details">Details</button>
+                            <button class="btn btn-bid">Bid Now</button>
+                        </div>
+                        ${phoneHtml}
+                    </div>
+                </div>
+            `}).join('');
+            
+            // Log what was rendered
+            console.log('📊 Rendered items with mock data');
+            console.log('📊 Items with bids:', Object.keys(mockBidData));
+            Object.entries(mockBidData).forEach(([itemName, data]) => {
+                const phoneData = getPhoneIdentifier(data);
+                if (phoneData) {
+                    console.log(`📱 ${itemName}: ${phoneData.text}`);
+                }
+            });
+        }
+
+        // Initialize
+        window.onload = renderItems;
+    </script>
+</body>
+</html>

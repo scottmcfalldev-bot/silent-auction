@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silent Auction - Secure Edition_V3</title>
+    <title>LSH Silent Auction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,8 +15,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #ecefd0 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,32 +26,45 @@
             margin: 0 auto;
         }
 
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-width: 300px;
+            height: auto;
+        }
+
         header {
             text-align: center;
-            color: white;
-            padding: 40px 20px;
+            color: #697D83;
+            padding: 20px 20px 40px;
             margin-bottom: 40px;
         }
 
         header h1 {
             font-size: 3rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: 700;
+            color: #6E8348;
         }
 
         header p {
             font-size: 1.2rem;
             opacity: 0.95;
+            color: #697D83;
         }
 
         .auction-status {
-            background: rgba(255,255,255,0.2);
-            color: white;
+            background: rgba(229, 159, 43, 0.2);
+            color: #E59F2B;
             padding: 10px 20px;
             border-radius: 25px;
             display: inline-block;
             margin-top: 15px;
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .auction-status.closed {
@@ -105,8 +121,8 @@
 
         .item-price {
             font-size: 1.5rem;
-            color: #667eea;
-            font-weight: bold;
+            color: #6E8348;
+            font-weight: 700;
             margin-bottom: 15px;
             display: flex;
             align-items: baseline;
@@ -127,14 +143,16 @@
         }
 
         .bidder-identifier {
-            font-size: 0.75rem;
-            color: #555;
-            background: #f0f0f0;
-            padding: 4px 12px;
-            border-radius: 12px;
-            display: inline-block;
-            margin-bottom: 10px;
-            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a2a4e;
+            background: #e6f9ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #00d9ff;
         }
 
         .item-buttons {
@@ -167,13 +185,14 @@
         }
 
         .btn-bid {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6E8348 0%, #5a6b3a 100%);
             color: white;
+            font-weight: 600;
         }
 
         .btn-bid:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(110, 131, 72, 0.4);
         }
 
         .btn-bid:disabled {
@@ -306,12 +325,12 @@
         .submit-btn, .confirm-btn, .edit-btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #E59F2B 0%, #d18a1f 100%);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-bottom: 10px;
@@ -319,7 +338,7 @@
 
         .submit-btn:hover, .confirm-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(229, 159, 43, 0.4);
         }
 
         .submit-btn:disabled, .confirm-btn:disabled {
@@ -385,17 +404,18 @@
         }
 
         .bid-amount-pill {
-            background: #667eea;
+            background: #E59F2B;
             color: white;
             padding: 8px 20px;
             border-radius: 25px;
+            font-weight: 600;
             font-size: 1.2rem;
             font-weight: bold;
         }
 
         .loading-indicator {
             text-align: center;
-            color: white;
+            color: rgb(0, 0, 0);
             padding: 20px;
             font-size: 1.1rem;
         }
@@ -416,9 +436,9 @@
         }
 
         @keyframes pricePulse {
-            0% { transform: scale(1); color: #667eea; }
-            30% { transform: scale(1.06); color: #2b6cb0; }
-            100% { transform: scale(1); color: #667eea; }
+            0% { transform: scale(1); color: #6E8348; }
+            30% { transform: scale(1.06); color: #5a6b3a; }
+            100% { transform: scale(1); color: #6E8348; }
         }
 
         @media (max-width: 768px) {
@@ -440,13 +460,18 @@
 </head>
 <body>
     <div class="container">
+        <div class="logo">
+            <img src="lsh-logo.png" alt="LSH PT Logo" onerror="this.style.display='none'">
+        </div>
         <header>
-            <h1>🎯 Silent Auction 2025 v3.0</h1>
+            <h1>LSH Silent Auction 2025</h1>
             <p>Bid on amazing items and support a great cause!</p>
             <div class="auction-status" id="auctionStatus">Auction is OPEN</div>
         </header>
 
         <div class="loading-indicator" id="loadingIndicator">Loading current bids...</div>
+
+        <p style="text-align: center; color: #697D83; margin-bottom: 50px; font-size: 1.8rem; font-style: italic;">The last 4 digits of the highest bidder's phone number are shown with each item.</p>
 
         <div class="items-grid" id="itemsGrid"></div>
     </div>
@@ -552,7 +577,8 @@
 
     <script>
         // CONFIGURATION: Replace with your actual Google Apps Script Web App URL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ5sQVTqXfA738hSwUc2iviURQYPOT8npqt2ESfNlbKVZIIgkJXJocbKAkZNd5rOWnMw/exec';
+        // IMPORTANT: Use the /exec URL, NOT the googleusercontent.com URL!
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywQJkfZjWudhqoNatVWvAFWOwz8ZvDH-LzWZM1bpt4zUWIomgJg9lFcLeCa2OV3imq-w/exec';
         
         // Auction configuration
         const AUCTION_END_TIME = new Date('2025-12-08T23:59:59'); // Set your auction end time
@@ -560,46 +586,123 @@
         // Item data - Update this with your actual items
         const items = [
             {
+                id: 'item0',
+                name: 'AI Consultation',
+                description: '1 hour consultation to see how AI can help you and your business GROW! Email scott@scottmcfall.com to schedule.',
+                startingBid: 30,
+                imageUrl: 'Images/scott1.jpg',
+            },
+            {
                 id: 'item1',
-                name: 'Soccer Ball',
-                description: 'High-quality soccer ball, official size and weight. Perfect for games and practice.',
-                startingBid: 50,
-                imageUrl: 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=400',
+                name: 'Dietitian Consultation',
+                description: '1 hour consultation with a Registered Dietitian Nutritionist.',
+                startingBid: 60,
+                imageUrl: 'Images/1 hour consultation with a Registered Dietitian Nutritionist .jpeg',
             },
             {
                 id: 'item2',
-                name: 'Signed Basketball',
-                description: 'Official NBA basketball signed by championship team. Authenticated with hologram certificate. Display case included.',
-                startingBid: 200,
-                imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400',
+                name: 'Orange Peel Concert Package',
+                description: 'Gift Certificate good for 2 Tickets to any show at The Orange Peel* and merch bundle.',
+                startingBid: 40,
+                imageUrl: 'Images/Orange Peel.jpg',
             },
             {
                 id: 'item3',
-                name: 'Artwork Print',
-                description: 'Limited edition print by renowned local artist. Numbered and signed. Frame included. 24x36 inches.',
-                startingBid: 100,
-                imageUrl: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=400',
+                name: 'rEvolve Gift Package',
+                description: '1 $100 gift card to rEvolve buy•sell•trade and a Gift basket filled with local art and goodies worth $200.',
+                startingBid: 10,
+                imageUrl: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=400',
             },
             {
                 id: 'item4',
-                name: 'Wine Collection',
-                description: 'Curated collection of 6 premium wines from Napa Valley. Includes tasting notes and pairing suggestions.',
-                startingBid: 250,
-                imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400',
+                name: 'Kids Yoga & Art Session',
+                description: '1 - 1:1 Session with Asheville Kids Yoga & Art.',
+                startingBid: 20,
+                imageUrl: 'Images/1 - 1-1 Session with Asheville Kids Yoga & Art .jpg',
             },
             {
                 id: 'item5',
-                name: 'Golf Club Set',
-                description: 'Professional grade golf club set with bag. Lightly used, excellent condition. Perfect for enthusiasts.',
-                startingBid: 300,
-                imageUrl: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=400',
+                name: 'Homemade Cookies - 3 Months',
+                description: 'A monthly batch of homemade cookies! One batch (about twenty cookies) of your favorite cookie from "100 Cookies" by Sarah Kieffer once a month for three months from January through March.',
+                startingBid: 60,
+                imageUrl: 'Images/Homemade cookies.jpg',
             },
             {
                 id: 'item6',
-                name: 'Concert Tickets',
-                description: 'Two VIP tickets to upcoming concert with backstage meet and greet. Premium seating included.',
-                startingBid: 400,
-                imageUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
+                name: 'Sommelier Wine Tasting',
+                description: 'Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided. Led by Cara Fuseler, Certified Sommelier.',
+                startingBid: 300,
+                imageUrl: 'Images/Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided.JPEG',
+            },
+            {
+                id: 'item7',
+                name: 'Wagner Family Wines',
+                description: '2 bottles of wine from the Wagner Family: Caymus California Cabernet & Mer Soleil Chardonnay.',
+                startingBid: 45,
+                imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&q=80',
+            },
+            {
+                id: 'item8',
+                name: 'Jeeper Champagne',
+                description: '2 bottles of Champagne Jeeper: Blanc de Blancs & Premier Cru Brut.',
+                startingBid: 75,
+                imageUrl: 'https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&q=80',
+            },
+            {
+                id: 'item9',
+                name: 'French Wine Collection',
+                description: '3 bottles of French wine (red, white, and rosé): Provence Rosé, Sancerre Blanc, and Bordeaux.',
+                startingBid: 45,
+                imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&q=80',
+            },
+            {
+                id: 'item10',
+                name: 'Italian Wine Duo',
+                description: '2 Italian wines: Pinot Grigio and a red blend from Piedmont.',
+                startingBid: 20,
+                imageUrl: 'Images/2 wines.png',
+            },
+            {
+                id: 'item11',
+                name: 'California Chardonnay Collection',
+                description: 'Explore Chardonnay with 3 bottles from California.',
+                startingBid: 25,
+                imageUrl: 'Images/Calironia Chardonnay Collection.jpg',
+            },
+            {
+                id: 'item12',
+                name: 'Private Tutoring Sessions',
+                description: '2 hours of private tutoring, all ages, most subjects covered by Blue Ridge Tutoring.',
+                startingBid: 40,
+                imageUrl: 'Images/2 hours of private tutoring, all ages, most subjects covered.jpeg',
+            },
+            {
+                id: 'item13',
+                name: '187 Killer Pads Set',
+                description: '187 Six-Pack Pad Set - Adult sized Wrist, Knee, Elbow Pads.',
+                startingBid: 10,
+                imageUrl: 'Images/187 Knee Pads.png',
+            },
+            {
+                id: 'item14',
+                name: 'Fresh Cinnamon Rolls',
+                description: '12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).',
+                startingBid: 10,
+                imageUrl: 'Images/12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).jpeg',
+            },
+            {
+                id: 'item15',
+                name: 'Kendra Scott Necklace',
+                description: 'Kendra Scott Gold Sun Pendant Necklace.',
+                startingBid: 40,
+                imageUrl: 'Images/Kendra_Scott_Gold_Sun_Pendant_Necklace_.jpg',
+            },
+            {
+                id: 'item16',
+                name: 'Handmade Large Bag',
+                description: 'Hand made large bag (15in. Across, 14in. Wide and 13 in. Long/deep.) by Daniele O Designs.',
+                startingBid: 90,
+                imageUrl: 'Images/Hand made large bag.jpg',
             }
         ];
 
@@ -656,7 +759,7 @@
         function getBidAmount(bidData, defaultValue) {
             if (!bidData) return defaultValue;
             if (typeof bidData === 'object' && bidData.bidAmount !== undefined) {
-                return bidData.bidAmount;
+                return Number(bidData.bidAmount);
             }
             if (typeof bidData === 'number') {
                 return bidData;
@@ -666,16 +769,25 @@
 
         // Get phone identifier for display (returns object with text or null)
         function getPhoneIdentifier(bidData) {
-            if (!bidData || typeof bidData !== 'object' || !bidData.phone) {
+            console.log('getPhoneIdentifier called with:', bidData);
+            if (!bidData || typeof bidData !== 'object') {
+                console.log('No bidData or not an object');
+                return null;
+            }
+            if (!bidData.phone) {
+                console.log('No phone field in bidData');
                 return null;
             }
             const phone = String(bidData.phone);
+            console.log('Phone number:', phone);
             const digitsOnly = phone.replace(/\D/g, '');
             if (digitsOnly.length >= 4) {
                 const last4 = digitsOnly.slice(-4);
-                // Return sanitized text only
-                return { text: `Top Bidder: ***-${last4}` };
+                const result = { text: `Highest Bidder: ${last4}` };
+                console.log('Returning phone identifier:', result);
+                return result;
             }
+            console.log('Not enough digits in phone');
             return null;
         }
 
@@ -713,7 +825,11 @@
                 const increment = getMinimumBidIncrement(currentBid);
                 const minNextBid = currentBid + increment;
                 const phoneData = getPhoneIdentifier(bidData);
+                
+                // Show phone identifier if available
                 const phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
+                
+                console.log(`Rendering ${item.name}: phoneData=${phoneData}, phoneHtml length=${phoneHtml.length}`);
                 
                 return `
                 <div class="item-card ${!auctionIsOpen ? 'disabled' : ''}">
@@ -779,23 +895,31 @@
                     const phoneData = getPhoneIdentifier(bidData);
                     const currentHasPhone = phoneEl.querySelector('.bidder-identifier') !== null;
                     
+                    // Debug logging
+                    console.log(`📱 Checking ${item.name}: bidData=`, bidData, 'phoneData=', phoneData, 'currentHasPhone=', currentHasPhone);
+                    
                     if (phoneData && !currentHasPhone) {
                         // Add phone identifier
                         const div = document.createElement('div');
                         div.className = 'bidder-identifier';
                         div.textContent = phoneData.text;
-                        phoneEl.textContent = ''; // Clear safely
+                        phoneEl.innerHTML = ''; // Clear safely
                         phoneEl.appendChild(div);
+                        console.log(`✅ Added phone identifier for ${item.name}`);
                     } else if (phoneData && currentHasPhone) {
                         // Update existing phone identifier using textContent
                         const existingDiv = phoneEl.querySelector('.bidder-identifier');
                         if (existingDiv && existingDiv.textContent !== phoneData.text) {
                             existingDiv.textContent = phoneData.text;
+                            console.log(`🔄 Updated phone identifier for ${item.name}`);
                         }
-                    } else if (!phoneData && currentHasPhone) {
-                        // Remove phone identifier
-                        phoneEl.textContent = ''; // Clear safely
+                    } else if (!phoneData && currentHasPhone && bidData) {
+                        // ONLY remove if we have bidData but no phone (meaning server said no phone)
+                        // Don't remove if bidData is undefined (server hasn't responded yet)
+                        phoneEl.innerHTML = ''; // Clear safely
+                        console.log(`❌ Removed phone identifier for ${item.name} (server has bid but no phone)`);
                     }
+                    // If !phoneData && !bidData, do nothing (keep whatever is there from initial render)
                 }
             });
         }
@@ -810,6 +934,11 @@
             try {
                 const response = await fetch(APPS_SCRIPT_URL + '?action=getBids');
                 const data = await response.json();
+                
+                // Debug logging
+                console.log('📊 Bid data received:', data);
+                console.log('📊 Number of items with bids:', Object.keys(data).length);
+                
                 // Keep a reference to prior bids if you want to compare or animate
                 currentBids = data || {};
                 // Update only what changed (no DOM wholesale replacement)
@@ -960,16 +1089,19 @@
                 hasError = true;
             }
 
-            // Validate bid amount with increment
+            // Validate bid amount with increment and maximum bid difference
             const bidData = currentBids[selectedItem.name];
             const currentBid = getBidAmount(bidData, selectedItem.startingBid);
             const increment = getMinimumBidIncrement(currentBid);
             const minBid = currentBid + increment;
+            const maxBid = currentBid + 100; // Maximum $100 above current bid
 
-            if (!bidAmount || bidAmount < minBid || bidAmount > 1000000) {
+            if (!bidAmount || bidAmount < minBid || bidAmount > 1000000 || bidAmount > maxBid) {
                 document.getElementById('bidError').style.display = 'block';
                 if (bidAmount > 1000000) {
                     document.getElementById('bidError').textContent = 'Bid amount too high (max $1,000,000)';
+                } else if (bidAmount > maxBid) {
+                    document.getElementById('bidError').textContent = `Maximum bid cannot exceed $${maxBid} (current bid + $100)`;
                 } else {
                     document.getElementById('bidError').textContent = `Minimum bid is $${minBid} (increment of $${increment})`;
                 }
