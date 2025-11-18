@@ -142,6 +142,21 @@
             margin-bottom: 15px;
         }
 
+        .quantity-indicator {
+            font-size: 0.85rem;
+            color: #6E8348;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-indicator::before {
+            content: "📦";
+            font-size: 1rem;
+        }
+
         .bidder-identifier {
             font-size: 0.85rem;
             color: #1a2a4e;
@@ -153,6 +168,102 @@
             font-weight: 600;
             text-align: center;
             border: 1px solid #00d9ff;
+        }
+
+        .top-bidders-container {
+            margin-top: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+
+        .top-bidders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #e9ecef;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .top-bidders-header:hover {
+            background: #dee2e6;
+        }
+
+        .top-bidders-title {
+            font-size: 0.85rem;
+            font-weight: 600;bb
+            color: #495057;
+        }
+
+        .quantity-badge {
+            background: #6E8348;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .dropdown-arrow {
+            font-size: 0.8rem;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .top-bidders-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .top-bidders-list.expanded {
+            max-height: 500px;
+        }
+
+        .bidder-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.85rem;
+        }
+
+        .bidder-row:hover {
+            background: #f8f9fa;
+        }
+
+        .bidder-rank {
+            font-weight: 700;
+            color: #6E8348;
+            min-width: 30px;
+        }
+
+        .bidder-amount {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .bidder-phone {
+            color: #6c757d;
+            font-family: monospace;
+        }
+
+        .no-bids-message {
+            padding: 12px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.85rem;
+            font-style: italic;
         }
 
         .item-buttons {
@@ -584,6 +695,7 @@
         const AUCTION_END_TIME = new Date('2025-12-08T23:59:59'); // Set your auction end time
         
         // Item data - Update this with your actual items
+        // Optional 'quantity' field for multi-winner items (defaults to 1)
         const items = [
             {
                 id: 'item0',
@@ -597,112 +709,263 @@
                 name: 'Dietitian Consultation',
                 description: '1 hour consultation with a Registered Dietitian Nutritionist.',
                 startingBid: 60,
-                imageUrl: 'Images/1 hour consultation with a Registered Dietitian Nutritionist .jpeg',
+                imageUrl: 'Images/dietitian.jpg',
             },
             {
                 id: 'item2',
                 name: 'Orange Peel Concert Package',
-                description: 'Gift Certificate good for 2 Tickets to any show at The Orange Peel* and merch bundle.',
+                description: 'Gift Certificate good for 2 Tickets to any show at The Orange Peel* and merch bundle. The Orange Peel.',
                 startingBid: 40,
-                imageUrl: 'Images/Orange Peel.jpg',
+                imageUrl: 'Images/orange-peel.jpg',
             },
             {
                 id: 'item3',
                 name: 'rEvolve Gift Package',
-                description: '1 $100 gift card to rEvolve buy•sell•trade and a Gift basket filled with local art and goodies worth $200.',
+                description: '1 $100 gift card to rEvolve buy•sell•trade and a Gift basket filled with local art and goodies from rEvolve buy•sell•trade worth $200. rEvolve buy•sell•trade // instagram @revolve_merc',
                 startingBid: 10,
-                imageUrl: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=400',
+                imageUrl: 'Images/revolve.jpg',
             },
             {
                 id: 'item4',
                 name: 'Kids Yoga & Art Session',
-                description: '1 - 1:1 Session with Asheville Kids Yoga & Art.',
+                description: '1 - 1:1 Session with Asheville Kids Yoga & Art. http://www.ashevillekidsyogaandart.com',
                 startingBid: 20,
-                imageUrl: 'Images/1 - 1-1 Session with Asheville Kids Yoga & Art .jpg',
+                imageUrl: 'Images/kids-yoga.jpg',
             },
             {
                 id: 'item5',
                 name: 'Homemade Cookies - 3 Months',
                 description: 'A monthly batch of homemade cookies! One batch (about twenty cookies) of your favorite cookie from "100 Cookies" by Sarah Kieffer once a month for three months from January through March.',
                 startingBid: 60,
-                imageUrl: 'Images/Homemade cookies.jpg',
+                imageUrl: 'Images/cookies.jpg',
             },
             {
                 id: 'item6',
                 name: 'Sommelier Wine Tasting',
                 description: 'Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided. Led by Cara Fuseler, Certified Sommelier.',
                 startingBid: 300,
-                imageUrl: 'Images/Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided.JPEG',
+                imageUrl: 'Images/wine-tasting.jpg',
             },
             {
                 id: 'item7',
                 name: 'Wagner Family Wines',
                 description: '2 bottles of wine from the Wagner Family: Caymus California Cabernet & Mer Soleil Chardonnay.',
                 startingBid: 45,
-                imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&q=80',
+                imageUrl: 'Images/wagner-wines.jpg',
             },
             {
                 id: 'item8',
                 name: 'Jeeper Champagne',
                 description: '2 bottles of Champagne Jeeper: Blanc de Blancs & Premier Cru Brut.',
                 startingBid: 75,
-                imageUrl: 'https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&q=80',
+                imageUrl: 'Images/champagne.jpg',
             },
             {
                 id: 'item9',
                 name: 'French Wine Collection',
                 description: '3 bottles of French wine (red, white, and rosé): Provence Rosé, Sancerre Blanc, and Bordeaux.',
                 startingBid: 45,
-                imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&q=80',
+                imageUrl: 'Images/french-wine.jpg',
             },
             {
                 id: 'item10',
                 name: 'Italian Wine Duo',
                 description: '2 Italian wines: Pinot Grigio and a red blend from Piedmont.',
                 startingBid: 20,
-                imageUrl: 'Images/2 wines.png',
+                imageUrl: 'Images/italian-wine.jpg',
             },
             {
                 id: 'item11',
                 name: 'California Chardonnay Collection',
                 description: 'Explore Chardonnay with 3 bottles from California.',
                 startingBid: 25,
-                imageUrl: 'Images/Calironia Chardonnay Collection.jpg',
+                imageUrl: 'Images/chardonnay.jpg',
             },
             {
                 id: 'item12',
                 name: 'Private Tutoring Sessions',
-                description: '2 hours of private tutoring, all ages, most subjects covered by Blue Ridge Tutoring.',
+                description: '2 hours of private tutoring, all ages, most subjects covered. Blue Ridge Tutoring www.blueridgetutoring.com',
                 startingBid: 40,
-                imageUrl: 'Images/2 hours of private tutoring, all ages, most subjects covered.jpeg',
+                imageUrl: 'Images/tutoring.jpg',
             },
             {
                 id: 'item13',
                 name: '187 Killer Pads Set',
-                description: '187 Six-Pack Pad Set - Adult sized Wrist, Knee, Elbow Pads.',
+                description: '187 Six-Pack Pad Set - Adult sized Wrist, Knee, Elbow Pads. 187 Killer Pads.',
                 startingBid: 10,
-                imageUrl: 'Images/187 Knee Pads.png',
+                imageUrl: 'Images/knee-pads.jpg',
             },
             {
                 id: 'item14',
                 name: 'Fresh Cinnamon Rolls',
                 description: '12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).',
                 startingBid: 10,
-                imageUrl: 'Images/12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).jpeg',
+                imageUrl: 'Images/cinnamon-rolls.jpg',
             },
             {
                 id: 'item15',
                 name: 'Kendra Scott Necklace',
                 description: 'Kendra Scott Gold Sun Pendant Necklace.',
                 startingBid: 40,
-                imageUrl: 'Images/Kendra_Scott_Gold_Sun_Pendant_Necklace_.jpg',
+                imageUrl: 'Images/necklace.jpg',
             },
             {
                 id: 'item16',
                 name: 'Handmade Large Bag',
-                description: 'Hand made large bag (15in. Across, 14in. Wide and 13 in. Long/deep.) by Daniele O Designs.',
+                description: 'Hand made large bag (15in. Across, 14in. Wide and 13 in. Long/deep.) by Daniele O Designs, danieleodesigns.com',
                 startingBid: 90,
-                imageUrl: 'Images/Hand made large bag.jpg',
+                imageUrl: 'Images/bag.jpg',
+            },
+            {
+                id: 'item17',
+                name: 'Cameras Note Cards',
+                description: '"Cameras" Set of four blank note cards & envelopes. Digital design, inkjet print, hand-painted watercolor, (4.5" x 6"). Rhododendron Press',
+                startingBid: 10,
+                imageUrl: 'Images/cameras-cards.jpg',
+            },
+            {
+                id: 'item18',
+                name: 'Skates Note Cards',
+                description: '"Skates" Set of four blank note cards & envelopes. Digital design, inkjet print, hand-painted watercolor, paint pen, (4.5" x 6"). Rhododendron Press',
+                startingBid: 10,
+                imageUrl: 'Images/skates-cards.jpg',
+            },
+            {
+                id: 'item19',
+                name: 'Lace Note Cards',
+                description: '"Lace" Set of four blank note cards & envelopes. Cyanotype prints with lace, (4.5" x 6"). Rhododendron Press',
+                startingBid: 10,
+                imageUrl: 'Images/lace-cards.jpg',
+            },
+            {
+                id: 'item20',
+                name: 'Jalapeno Jelly Jar',
+                description: '8oz jar of homemade jalapeno jelly. Perfect for pairing with cheese or as a unique gift!',
+                startingBid: 5,
+                imageUrl: 'Images/jalapeno-jelly.jpg',
+                quantity: 12,
+            },
+            {
+                id: 'item21',
+                name: 'Blue Beaded Earrings',
+                description: 'Handcrafted Blue Beaded Earrings. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-blue-earrings.jpg',
+            },
+            {
+                id: 'item22',
+                name: 'Flower Earrings',
+                description: 'Handcrafted Flower Earrings. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-flower-earrings.jpg',
+            },
+            {
+                id: 'item23',
+                name: 'LSH-Themed Bracelet',
+                description: 'Handcrafted LSH-Themed Bracelet. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-lsh-bracelet.jpg',
+            },
+            {
+                id: 'item24',
+                name: 'Blue-Black Metallic Bracelet',
+                description: 'Handcrafted Blue-Black Metallic Bracelet. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-blue-black-bracelet.jpg',
+            },
+            {
+                id: 'item25',
+                name: 'Packaged Turquoise Bracelet',
+                description: 'Handcrafted Packaged Turquoise Bracelet. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-turquoise-packaged.jpg',
+            },
+            {
+                id: 'item26',
+                name: 'Big Brown Stone Bracelet',
+                description: 'Handcrafted Big Brown Stone Bracelet. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-brown-stone.jpg',
+            },
+            {
+                id: 'item27',
+                name: 'Turquoise Bracelet with Feather',
+                description: 'Handcrafted Turquoise Bracelet with Feather. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-turquoise-feather.jpg',
+            },
+            {
+                id: 'item28',
+                name: 'Brown Stone Vibes Bracelet',
+                description: 'Handcrafted Brown Stone Vibes Bracelet. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-brown-vibes.jpg',
+            },
+            {
+                id: 'item29',
+                name: 'Green Nature Vibes Bracelet',
+                description: 'Handcrafted Green Nature Vibes Bracelet. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-green-vibes.jpg',
+            },
+            {
+                id: 'item30',
+                name: 'Blue Bracelet with Hand Wings',
+                description: 'Handcrafted Blue Bracelet with Hand Wings. Fiddle & Thread KSQ',
+                startingBid: 12,
+                imageUrl: 'Images/jewelry-blue-wings.jpg',
+            },
+            {
+                id: 'item31',
+                name: 'Holiday Pinecone Wreath',
+                description: 'Handmade Holiday Pinecone 24" Wreath with wreath storage container. By Amy Murray',
+                startingBid: 20,
+                imageUrl: 'Images/wreath.jpg',
+            },
+            {
+                id: 'item32',
+                name: 'Crocheted Yarn Pumpkins',
+                description: 'Handmade Crocheted Yarn Pumpkins. Made by Mandy Antczak (Josie and Nolan\'s Grandma)',
+                startingBid: 10,
+                imageUrl: 'Images/pumpkins.jpg',
+            },
+            {
+                id: 'item33',
+                name: 'Holiday Gift Basket',
+                description: 'Hand crafted gift basket - made with locally sourced materials and full of sweet holiday treats. https://appalachiancraftbaskets.com/',
+                startingBid: 20,
+                imageUrl: 'Images/gift-basket.jpg',
+            },
+            {
+                id: 'item34',
+                name: 'LSH Tote Bag',
+                description: 'LSH tote bag (2 autographed by Mr. Gibbs available)',
+                startingBid: 10,
+                imageUrl: 'Images/lsh-tote.jpg',
+                quantity: 4,
+            },
+            {
+                id: 'item35',
+                name: 'Tabletop Roleplaying Game Session',
+                description: 'Introduction to Tabletop Roleplaying Games — Private Session. Discover the fun, creativity, and collaboration of tabletop roleplaying games in this family-friendly "Introduction to TTRPGs" experience! Perfect for beginners of all ages (readers who can do basic arithmetic), this 3–4 hour session teaches what tabletop roleplaying games are, how they connect to classics like Dungeons & Dragons, and how to jump right into playing a simple, rules-light adventure. Your host is an experienced Game Master who provides everything needed for the session—just bring your imagination and enthusiasm! What\'s included: Overview of TTRPGs, Guided character creation, Clear rules explanation, A fun beginner-friendly adventure, All materials provided. Session Details: Length 3–4 hours, Suitable for families/kids/adults or solo, No experience required. Scheduling: Weeknights 7pm–11pm start, Sundays 10am–5pm start. Unavailable: Nov 24–30 and Dec 22–Jan 1. A $20/person value for a multi-hour private experience!',
+                startingBid: 40,
+                imageUrl: 'Images/rpg.jpg',
+                quantity: 3,
+            },
+            {
+                id: 'item36',
+                name: 'Stained Glass Axolotl',
+                description: 'Handmade stained glass axolotl by local artist. www.resin8light.com',
+                startingBid: 30,
+                imageUrl: 'Images/axolotl.jpg',
+            },
+            {
+                id: 'item37',
+                name: 'Coffee Lovers Bundle',
+                description: 'Coffee Lovers\' Bundle from Cooperative Coffee includes: a tasting box with four coffees (roughly $80 value, before tax), two colorful diner mugs ($24 value) and two \'tickets\' to a coffee cupping. https://cooperativecoffeeroasters.com/',
+                startingBid: 80,
+                imageUrl: 'Images/coffee-bundle.jpg',
+                quantity: 2,
             }
         ];
 
@@ -791,6 +1054,88 @@
             return null;
         }
 
+        // Extract last 4 digits from phone number
+        function getPhoneLast4(phone) {
+            if (!phone) return null;
+            const digitsOnly = String(phone).replace(/\D/g, '');
+            return digitsOnly.length >= 4 ? digitsOnly.slice(-4) : null;
+        }
+
+        // Get top N bids for multi-quantity items (returns array)
+        function getTopBids(bidData, quantity) {
+            console.log('getTopBids called:', { bidData, quantity, isArray: Array.isArray(bidData) });
+            
+            // If bidData is an array, it's already formatted for multi-quantity
+            if (Array.isArray(bidData)) {
+                const result = bidData.slice(0, quantity).map(bid => ({
+                    amount: Number(bid.bidAmount || bid.amount || 0),
+                    phone: getPhoneLast4(bid.phone),
+                    fullName: bid.fullName
+                }));
+                console.log('Returning array of bids:', result);
+                return result;
+            }
+            // If it's a single bid object, wrap it in an array
+            if (bidData && typeof bidData === 'object' && bidData.bidAmount) {
+                const result = [{
+                    amount: Number(bidData.bidAmount),
+                    phone: getPhoneLast4(bidData.phone),
+                    fullName: bidData.fullName
+                }];
+                console.log('Wrapping single bid:', result);
+                return result;
+            }
+            console.log('No valid bid data, returning empty array');
+            return [];
+        }
+
+        // Render top bidders dropdown for multi-quantity items
+        function renderTopBidders(item, bids) {
+            const quantity = item.quantity || 1;
+            const hasBids = bids && bids.length > 0;
+            const bidCount = hasBids ? bids.length : 0;
+            
+            console.log(`renderTopBidders for ${item.name}:`, { quantity, bidCount, bids });
+            
+            let bidsHtml = '';
+            if (hasBids) {
+                bidsHtml = bids.map((bid, index) => `
+                    <div class="bidder-row">
+                        <span class="bidder-rank">#${index + 1}</span>
+                        <span class="bidder-amount">$${bid.amount}</span>
+                        <span class="bidder-phone">${bid.phone ? `ends in ${bid.phone}` : 'N/A'}</span>
+                    </div>
+                `).join('');
+            } else {
+                bidsHtml = '<div class="no-bids-message">No bids yet - be the first!</div>';
+            }
+
+            return `
+                <div class="top-bidders-container">
+                    <div class="top-bidders-header" onclick="toggleTopBidders('${item.id}')">
+                        <div class="top-bidders-title">
+                            Top Bidders<span class="quantity-badge">${bidCount} of ${quantity}</span>
+                        </div>
+                        <div class="dropdown-arrow expanded" id="arrow-${item.id}">▼</div>
+                    </div>
+                    <div class="top-bidders-list expanded" id="bidders-${item.id}">
+                        ${bidsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Toggle top bidders dropdown
+        function toggleTopBidders(itemId) {
+            const list = document.getElementById(`bidders-${itemId}`);
+            const arrow = document.getElementById(`arrow-${itemId}`);
+            
+            if (list && arrow) {
+                list.classList.toggle('expanded');
+                arrow.classList.toggle('expanded');
+            }
+        }
+
         // Generate unique bid ID
         function generateBidId() {
             return Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -821,23 +1166,37 @@
             const grid = document.getElementById('itemsGrid');
             grid.innerHTML = items.map(item => {
                 const bidData = currentBids[item.name];
-                const currentBid = getBidAmount(bidData, item.startingBid);
+                const quantity = item.quantity || 1;
+                const isMultiQuantity = quantity > 1;
+                
+                let currentBid, phoneHtml;
+                
+                if (isMultiQuantity) {
+                    // For multi-quantity items, show top N bids
+                    const topBids = getTopBids(bidData, quantity);
+                    // Current bid is the lowest winning bid (or starting bid if no bids)
+                    currentBid = topBids.length > 0 ? topBids[topBids.length - 1].amount : item.startingBid;
+                    phoneHtml = renderTopBidders(item, topBids);
+                } else {
+                    // For single-quantity items, use existing logic
+                    currentBid = getBidAmount(bidData, item.startingBid);
+                    const phoneData = getPhoneIdentifier(bidData);
+                    phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
+                }
+                
                 const increment = getMinimumBidIncrement(currentBid);
                 const minNextBid = currentBid + increment;
-                const phoneData = getPhoneIdentifier(bidData);
                 
-                // Show phone identifier if available
-                const phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
-                
-                console.log(`Rendering ${item.name}: phoneData=${phoneData}, phoneHtml length=${phoneHtml.length}`);
+                console.log(`Rendering ${item.name}: quantity=${quantity}, isMulti=${isMultiQuantity}`);
                 
                 return `
                 <div class="item-card ${!auctionIsOpen ? 'disabled' : ''}">
                     <img src="${item.imageUrl}" alt="${item.name}" class="item-image">
                     <div class="item-content">
                         <div class="item-title">${item.name}</div>
+                        ${isMultiQuantity ? `<div class="quantity-indicator">Quantity: ${quantity} available</div>` : ''}
                         <div class="item-price">
-                            <span class="price-label">Current Bid: </span>
+                            <span class="price-label">${isMultiQuantity ? 'Lowest Winning Bid:' : 'Current Bid:'} </span>
                             <span id="price-${item.id}">$${currentBid}</span>
                         </div>
                         <div class="bid-increment" id="minbid-${item.id}">Next minimum bid: $${minNextBid}</div>
@@ -863,7 +1222,17 @@
 
             items.forEach(item => {
                 const bidData = data[item.name];
-                const newBid = getBidAmount(bidData, item.startingBid);
+                const quantity = item.quantity || 1;
+                const isMultiQuantity = quantity > 1;
+                
+                let newBid;
+                if (isMultiQuantity) {
+                    const topBids = getTopBids(bidData, quantity);
+                    newBid = topBids.length > 0 ? topBids[topBids.length - 1].amount : item.startingBid;
+                } else {
+                    newBid = getBidAmount(bidData, item.startingBid);
+                }
+                
                 const priceEl = document.getElementById(`price-${item.id}`);
                 const minEl = document.getElementById(`minbid-${item.id}`);
                 const phoneEl = document.getElementById(`phone-${item.id}`);
@@ -890,36 +1259,51 @@
                     }
                 }
 
-                // Update phone identifier if it exists
+                // Update phone display area
                 if (phoneEl) {
-                    const phoneData = getPhoneIdentifier(bidData);
-                    const currentHasPhone = phoneEl.querySelector('.bidder-identifier') !== null;
-                    
-                    // Debug logging
-                    console.log(`📱 Checking ${item.name}: bidData=`, bidData, 'phoneData=', phoneData, 'currentHasPhone=', currentHasPhone);
-                    
-                    if (phoneData && !currentHasPhone) {
-                        // Add phone identifier
-                        const div = document.createElement('div');
-                        div.className = 'bidder-identifier';
-                        div.textContent = phoneData.text;
-                        phoneEl.innerHTML = ''; // Clear safely
-                        phoneEl.appendChild(div);
-                        console.log(`✅ Added phone identifier for ${item.name}`);
-                    } else if (phoneData && currentHasPhone) {
-                        // Update existing phone identifier using textContent
-                        const existingDiv = phoneEl.querySelector('.bidder-identifier');
-                        if (existingDiv && existingDiv.textContent !== phoneData.text) {
-                            existingDiv.textContent = phoneData.text;
-                            console.log(`🔄 Updated phone identifier for ${item.name}`);
+                    if (isMultiQuantity) {
+                        // Handle multi-quantity items with top bidders dropdown
+                        const topBids = getTopBids(bidData, quantity);
+                        const hasTopBidders = phoneEl.querySelector('.top-bidders-container') !== null;
+                        
+                        if (topBids.length > 0 || bidData) {
+                            const newHtml = renderTopBidders(item, topBids);
+                            // Only update if content changed
+                            if (!hasTopBidders || phoneEl.innerHTML !== newHtml) {
+                                phoneEl.innerHTML = newHtml;
+                                console.log(`🔄 Updated top bidders for ${item.name}`);
+                            }
                         }
-                    } else if (!phoneData && currentHasPhone && bidData) {
-                        // ONLY remove if we have bidData but no phone (meaning server said no phone)
-                        // Don't remove if bidData is undefined (server hasn't responded yet)
-                        phoneEl.innerHTML = ''; // Clear safely
-                        console.log(`❌ Removed phone identifier for ${item.name} (server has bid but no phone)`);
+                    } else {
+                        // Handle single-quantity items with phone identifier
+                        const phoneData = getPhoneIdentifier(bidData);
+                        const currentHasPhone = phoneEl.querySelector('.bidder-identifier') !== null;
+                        
+                        console.log(`📱 Checking ${item.name}: bidData=`, bidData, 'phoneData=', phoneData, 'currentHasPhone=', currentHasPhone);
+                        
+                        if (phoneData && !currentHasPhone) {
+                            // Add phone identifier
+                            const div = document.createElement('div');
+                            div.className = 'bidder-identifier';
+                            div.textContent = phoneData.text;
+                            phoneEl.innerHTML = ''; // Clear safely
+                            phoneEl.appendChild(div);
+                            console.log(`✅ Added phone identifier for ${item.name}`);
+                        } else if (phoneData && currentHasPhone) {
+                            // Update existing phone identifier using textContent
+                            const existingDiv = phoneEl.querySelector('.bidder-identifier');
+                            if (existingDiv && existingDiv.textContent !== phoneData.text) {
+                                existingDiv.textContent = phoneData.text;
+                                console.log(`🔄 Updated phone identifier for ${item.name}`);
+                            }
+                        } else if (!phoneData && currentHasPhone && bidData) {
+                            // ONLY remove if we have bidData but no phone (meaning server said no phone)
+                            // Don't remove if bidData is undefined (server hasn't responded yet)
+                            phoneEl.innerHTML = ''; // Clear safely
+                            console.log(`❌ Removed phone identifier for ${item.name} (server has bid but no phone)`);
+                        }
+                        // If !phoneData && !bidData, do nothing (keep whatever is there from initial render)
                     }
-                    // If !phoneData && !bidData, do nothing (keep whatever is there from initial render)
                 }
             });
         }
