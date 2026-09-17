@@ -1,0 +1,371 @@
+// ============================================================
+// LSH Silent Auction — everything you change year to year lives
+// in this file. After editing it, run:
+//     node tools/sync-script-items.js
+// which copies the items + end time into apps-script/Code.gs. Then paste
+// Code.gs into the Apps Script editor and redeploy (see apps-script/SETUP.md).
+// ============================================================
+
+const AUCTION = {
+    year: 2026,
+    title: 'LSH Silent Auction',
+    tagline: 'Bid on something great and support Lucy S. Herring Elementary.',
+
+    // Closing time WITH a timezone offset (-05:00 = Eastern Standard Time,
+    // -04:00 = Eastern Daylight Time). Must match AUCTION_END_TIME in Code.gs.
+    endTime: '2026-12-06T21:00:00-05:00',
+
+    // The /exec URL of this year's Apps Script deployment.
+    // Leave empty to run the page in demo mode (bids stay in the browser).
+    scriptUrl: '',
+
+    orgName: 'Lucy S. Herring Parent Team',
+    contactName: 'Mindy Smith',
+    contactEmail: 'herringparentteam@gmail.com',
+
+    // Nobody can bid more than this much above the current bid at once.
+    maxRaise: 100,
+};
+
+// Items. `name` is what bids are stored under, so don't rename an item once
+// bidding has started. `quantity` (optional) = how many winners the item has.
+// `image` comes from tools/optimize-images.sh.
+const ITEMS = [
+    {
+        name: 'AI Consultation',
+        category: 'Experiences',
+        startingBid: 30,
+        image: 'img/scott1.jpg',
+        description: '1 hour consultation to see how AI can help you and your business GROW! Email scott@scottmcfall.com to schedule.',
+    },
+    {
+        name: '1 Hour Dietitian Consultation',
+        category: 'Experiences',
+        startingBid: 60,
+        image: 'img/1-hour-consultation-with-a-registered-dietitian-nutritionist.jpg',
+        description: '1 hour consultation with a Registered Dietitian Nutritionist.',
+    },
+    {
+        name: 'Orange Peel Concert Package',
+        category: 'Experiences',
+        startingBid: 40,
+        image: 'img/orange-peel.jpg',
+        description: 'Gift Certificate good for 2 Tickets to any show at The Orange Peel* and merch bundle. The Orange Peel.',
+    },
+    {
+        name: 'rEvolve Gift Card - $100 value',
+        category: 'Gifts & Gear',
+        startingBid: 10,
+        quantity: 2,
+        image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=400',
+        description: '1 $100 gift card to rEvolve buy•sell•trade // instagram @revolve_merc',
+    },
+    {
+        name: 'Kids Yoga & Art Session',
+        category: 'Experiences',
+        startingBid: 20,
+        image: 'img/1-1-1-session-with-asheville-kids-yoga-art.jpg',
+        description: '1 - 1:1 Session with Asheville Kids Yoga & Art. http://www.ashevillekidsyogaandart.com',
+    },
+    {
+        name: 'Homemade Cookies - 3 Months',
+        category: 'Food & Drink',
+        startingBid: 20,
+        image: 'img/homemade-cookies.jpg',
+        description: 'A monthly batch of homemade cookies! One batch (about twenty cookies) of your favorite cookie from "100 Cookies" by Sarah Kieffer once a month for three months from January through March.',
+    },
+    {
+        name: 'Sommelier Wine Tasting',
+        category: 'Experiences',
+        startingBid: 300,
+        image: 'img/sommelier-led-wine-tasting-class-for-up-to-6-people-theme-of-your-choosing-wine-provided.jpg',
+        description: 'Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided. Led by Cara Fuseler, Certified Sommelier.',
+    },
+    {
+        name: 'Wagner Family Wines',
+        category: 'Food & Drink',
+        startingBid: 45,
+        image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&q=80',
+        description: '2 bottles of wine from the Wagner Family: Caymus California Cabernet & Mer Soleil Chardonnay.',
+    },
+    {
+        name: 'Jeeper Champagne',
+        category: 'Food & Drink',
+        startingBid: 75,
+        image: 'https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&q=80',
+        description: '2 bottles of Champagne Jeeper: Blanc de Blancs & Premier Cru Brut.',
+    },
+    {
+        name: 'French Wine Collection',
+        category: 'Food & Drink',
+        startingBid: 45,
+        image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&q=80',
+        description: '3 bottles of French wine (red, white, and rosé): Provence Rosé, Sancerre Blanc, and Bordeaux.',
+    },
+    {
+        name: 'Italian Wine Duo',
+        category: 'Food & Drink',
+        startingBid: 20,
+        image: 'img/2-wines.jpg',
+        description: '2 Italian wines: Pinot Grigio and a red blend from Piedmont.',
+    },
+    {
+        name: 'California Chardonnay Collection',
+        category: 'Food & Drink',
+        startingBid: 25,
+        image: 'img/calironia-chardonnay-collection.jpg',
+        description: 'Explore Chardonnay with 3 bottles from California.',
+    },
+    {
+        name: 'Private Tutoring Sessions',
+        category: 'Experiences',
+        startingBid: 25,
+        image: 'img/2-hours-of-private-tutoring-all-ages-most-subjects-covered.jpg',
+        description: '2 hours of private tutoring, all ages, most subjects covered. Blue Ridge Tutoring www.blueridgetutoring.com',
+    },
+    {
+        name: '187 Killer Pads Set',
+        category: 'Gifts & Gear',
+        startingBid: 10,
+        image: 'img/187-knee-pads.jpg',
+        description: '187 Six-Pack Pad Set - Adult sized Wrist, Knee, Elbow Pads. 187 Killer Pads.',
+    },
+    {
+        name: 'Fresh Cinnamon Rolls',
+        category: 'Food & Drink',
+        startingBid: 10,
+        image: 'img/12-cinnamon-rolls-from-scratch-with-cream-cheese-icing-baked-or-unbaked-with-instructions.jpg',
+        description: '12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).',
+    },
+    {
+        name: 'Kendra Scott Necklace',
+        category: 'Jewelry',
+        startingBid: 40,
+        image: 'img/kendra-scott-gold-sun-pendant-necklace.jpg',
+        description: 'Kendra Scott Gold Sun Pendant Necklace.',
+    },
+    {
+        name: 'Handmade Large Bag',
+        category: 'Art & Handmade',
+        startingBid: 50,
+        image: 'img/hand-made-large-bag.jpg',
+        description: 'Hand made large bag (15in. Across, 14in. Wide and 13 in. Long/deep.) by Daniele O Designs, danieleodesigns.com',
+    },
+    {
+        name: 'Cameras Note Cards',
+        category: 'Art & Handmade',
+        startingBid: 10,
+        image: 'img/cameras-cards.jpg',
+        description: '"Cameras" Set of four blank note cards & envelopes. Digital design, inkjet print, hand-painted watercolor, (4.5" x 6"). Rhododendron Press',
+    },
+    {
+        name: 'Skates Note Cards',
+        category: 'Art & Handmade',
+        startingBid: 10,
+        image: 'img/skates-cards.jpg',
+        description: '"Skates" Set of four blank note cards & envelopes. Digital design, inkjet print, hand-painted watercolor, paint pen, (4.5" x 6"). Rhododendron Press',
+    },
+    {
+        name: 'Lace Note Cards',
+        category: 'Art & Handmade',
+        startingBid: 10,
+        image: 'img/lace-cards.jpg',
+        description: '"Lace" Set of four blank note cards & envelopes. Cyanotype prints with lace, (4.5" x 6"). Rhododendron Press',
+    },
+    {
+        name: 'Jalapeno Jelly Jar',
+        category: 'Food & Drink',
+        startingBid: 5,
+        quantity: 12,
+        image: 'img/jalapeno-jelly.jpg',
+        description: '8oz jar of homemade jalapeno jelly. Perfect for pairing with cheese or as a unique gift!',
+    },
+    {
+        name: 'Blue Beaded Earrings',
+        category: 'Jewelry',
+        startingBid: 12,
+        image: 'img/jewelry-blue-earrings.jpg',
+        description: 'A pair of handmade drop earrings featuring a small gold stud with a dangling bead arrangement, including a dark bead, gold spacers, and a larger marbled gray-blue bead at the bottom; simple, subtle, and sophisticated. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Purple Dangle Earrings',
+        category: 'Jewelry',
+        startingBid: 10,
+        image: 'img/purple-dangle-earrings.jpg',
+        description: 'A pair of handmade dangle earrings featuring a gold hook and a vertical stack of irregular, translucent gemstone chips in pastel shades of purple, green, and clear, separated by shiny gold spacer beads, a delicate, colorful, and elegant set with a natural, boho touch. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'LSH-Themed Bracelet',
+        category: 'Jewelry',
+        startingBid: 10,
+        image: 'img/jewelry-lsh-bracelet.jpg',
+        description: 'Beaded bracelet features glossy turquoise beads paired with gold accents. Three colorful circular charms hang from the front—yellow with an L, light blue with an S, and red with an H—representing Lucy S. Herring Elementary School of Ecology, bright, playful, and school-spirited. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Blue-Black Metallic Bracelet',
+        category: 'Jewelry',
+        startingBid: 12,
+        image: 'img/jewelry-blue-black-bracelet.jpg',
+        description: 'The bracelet features dark blue evil-eye beads, silver spacer beads, and a silver Hamsa hand charm. This bracelet is a symbol of a protective, symbolic, and handcrafted look. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Packaged Turquoise Bracelet',
+        category: 'Jewelry',
+        startingBid: 12,
+        image: 'img/jewelry-turquoise-packaged.jpg',
+        description: 'A soft aqua beads bracelet mixed with multicolored accent beads in shades of white, blue, peach, and purple, along with small metallic spacers that are bright, delicate, and artisan-crafted. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Big Brown Stone Bracelet',
+        category: 'Jewelry',
+        startingBid: 12,
+        image: 'img/jewelry-brown-stone.jpg',
+        description: 'Large polished brown stone is the centerpiece. The bracelet is accented with rounded tiger\'s-eye beads and antique gold-toned spacers, earthy, bold, and elegant. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Turquoise Bracelet with Feather',
+        category: 'Jewelry',
+        startingBid: 10,
+        image: 'img/jewelry-turquoise-feather.jpg',
+        description: 'A turquoise-toned beaded bracelet that features frosted teal beads, silver accents, and small dangling charms, including a leaf and a ginkgo-style charm that is elegant, earthy, and softly bohemian. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Brown Stone Vibes Bracelet',
+        category: 'Jewelry',
+        startingBid: 10,
+        image: 'img/jewelry-brown-vibes.jpg',
+        description: 'Earthy-toned, round and disc-shaped beads in shades of brown, black, and reddish stone, accented with warm copper spacers displaying a rustic, natural look. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Green Nature Vibes Bracelet',
+        category: 'Jewelry',
+        startingBid: 12,
+        image: 'img/jewelry-green-vibes.jpg',
+        description: 'A multi-strand bracelet that features earthy green and amber-toned beads, accented with decorative bronze spacers, and includes one macramé-style woven strand in tan cord with a natural and bohemian vibe. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Blue Bracelet with Hand Wings',
+        category: 'Jewelry',
+        startingBid: 12,
+        image: 'img/jewelry-blue-wings.jpg',
+        description: 'The bracelet features deep navy-blue round beads paired with silver spacers, and it includes two dangling silver charms—a Hamsa hand and small leaves displaying a simple, symbolic, and elegant look. Handcrafted by Fiddle & Thread KSQ.',
+    },
+    {
+        name: 'Holiday Pinecone Wreath',
+        category: 'Holiday',
+        startingBid: 20,
+        image: 'img/wreath.jpg',
+        description: 'Handmade Holiday Pinecone 24" Wreath with wreath storage container. By Amy Murray',
+    },
+    {
+        name: 'Crocheted Yarn Pumpkins',
+        category: 'Art & Handmade',
+        startingBid: 10,
+        image: 'img/pumpkins.jpg',
+        description: 'Handmade Crocheted Yarn Pumpkins. Made by Mandy Antczak (Josie and Nolan\'s Grandma)',
+    },
+    {
+        name: 'rEvolve Gift Basket',
+        category: 'Gifts & Gear',
+        startingBid: 10,
+        image: 'img/gift-basket.jpg',
+        description: '1. Daisy rug\n2. Twist perfume (Mountain)\n3. Hand forged brass earrings made by local artist, Callisa Lawn\n4. Cat Kitchen print by local artist, Sid Worsham\n5. Large pink lidded ceramic vessel by local potter, Katlyn Swords\n6. Handmade light pink scarf\n7. Croissant air freshener\n8. Cute pair of socks\n9. Pair of strawberry hair clips',
+    },
+    {
+        name: 'LSH Tote Bag',
+        category: 'Gifts & Gear',
+        startingBid: 10,
+        quantity: 4,
+        image: 'img/lsh-tote.jpg',
+        description: 'LSH tote bag (2 autographed by Mr. Gibbs available)',
+    },
+    {
+        name: 'Tabletop Roleplaying Game Session',
+        category: 'Experiences',
+        startingBid: 40,
+        quantity: 3,
+        image: 'img/rpg.jpg',
+        description: 'Introduction to Tabletop Roleplaying Games — Private Session. Discover the fun, creativity, and collaboration of tabletop roleplaying games in this family-friendly "Introduction to TTRPGs" experience! Perfect for beginners of all ages (readers who can do basic arithmetic), this 3–4 hour session teaches what tabletop roleplaying games are, how they connect to classics like Dungeons & Dragons, and how to jump right into playing a simple, rules-light adventure. Your host is an experienced Game Master who provides everything needed for the session—just bring your imagination and enthusiasm! What\'s included: Overview of TTRPGs, Guided character creation, Clear rules explanation, A fun beginner-friendly adventure, All materials provided. Session Details: Length 3–4 hours, Suitable for families/kids/adults or solo, No experience required. Scheduling: Weeknights 7pm–11pm start, Sundays 10am–5pm start. Unavailable: Nov 24–30 and Dec 22–Jan 1. A $20/person value for a multi-hour private experience!',
+    },
+    {
+        name: 'Stained Glass Axolotl',
+        category: 'Art & Handmade',
+        startingBid: 15,
+        image: 'img/axolotl.jpg',
+        description: 'Handmade stained glass axolotl by local artist. www.resin8light.com',
+    },
+    {
+        name: 'Coffee Lovers Bundle',
+        category: 'Food & Drink',
+        startingBid: 80,
+        quantity: 2,
+        image: 'img/coffee-bundle.jpg',
+        description: 'Coffee Lovers\' Bundle from Cooperative Coffee includes: a tasting box with four coffees (roughly $80 value, before tax), two colorful diner mugs ($24 value) and two \'tickets\' to a coffee cupping. https://cooperativecoffeeroasters.com/',
+    },
+    {
+        name: 'Hand Crafted Gift Basket',
+        category: 'Gifts & Gear',
+        startingBid: 20,
+        image: 'img/appgift.jpg',
+        description: 'Handcrafted gift basket - made with locally sourced materials and full of sweet holiday treats from Appalachian Craft Baskets. https://appalachiancraftbaskets.com',
+    },
+    {
+        name: 'Three Christmas Ornaments',
+        category: 'Holiday',
+        startingBid: 30,
+        image: 'img/felt-ornament-balls.jpg',
+        description: 'Set of three handmade felted Christmas ornaments.',
+    },
+    {
+        name: 'Xmas Flamingo Ornament',
+        category: 'Holiday',
+        startingBid: 10,
+        image: 'img/felt-flamingo.jpg',
+        description: 'Handmade felted Christmas flamingo ornament.',
+    },
+    {
+        name: 'Soccer Ball Ornament',
+        category: 'Holiday',
+        startingBid: 8,
+        image: 'img/felt-soccer-ball.jpg',
+        description: 'Handmade felted soccer ball ornament.',
+    },
+    {
+        name: 'Professor Bunny Ornament',
+        category: 'Holiday',
+        startingBid: 10,
+        image: 'img/felt-professor-bunny.jpg',
+        description: 'Handmade felted professor bunny ornament.',
+    },
+    {
+        name: 'Avocado Ornament',
+        category: 'Holiday',
+        startingBid: 10,
+        image: 'img/felt-avocado.jpg',
+        description: 'Handmade felted avocado ornament.',
+    },
+    {
+        name: 'Bad Bunny Ornament',
+        category: 'Holiday',
+        startingBid: 8,
+        image: 'img/felt-bad-bunny.jpg',
+        description: 'Handmade felted Bad Bunny ornament.',
+    },
+    {
+        name: 'Mini Christmas Photo Session',
+        category: 'Experiences',
+        startingBid: 75,
+        image: 'img/mini-christmas-photo-session.jpg',
+        description: 'Professional mini Christmas photo session with Ashlyn Davis Photography.',
+    },
+    {
+        name: 'Cabo Card Game Deck',
+        category: 'Gifts & Gear',
+        startingBid: 2,
+        quantity: 6,
+        image: 'img/cabo.jpg',
+        description: 'Your new favorite card game! Cabo is fast, fun, and easy to learn – perfect for family game night, in the stands at soccer practice, or killing time in homeroom. Simple, fast-paced, and actually fun – for parents, kids, and grandparents alike. Quick and portable, Cabo gives you a way to connect in real time, anywhere you go.\n\nEach Player starts with four face-down cards and only partial knowledge of what they\'re holding. Swap, Spy, Peek, and draw your way to the lowest score. Call "Cabo" when you think you\'ve won.\n\n• 2-5 Players (more with multiple decks)\n• Ages 8+\n• Learn in under 5 minutes\n• Full game takes 30 minutes\n• Rounds are as quick as 5 minutes\n• Great for travel, game night, classrooms, and more.\n• Made in Asheville\n• Original artwork by Raleigh artist Adam Peele\n• Printed in USA\n\nCompany: Shareful Games, LLC\nWebsite: www.cabogame.com',
+    },
+];
+
+if (typeof module !== "undefined") module.exports = { AUCTION, ITEMS };

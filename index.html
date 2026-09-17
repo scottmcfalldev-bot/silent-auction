@@ -4,1114 +4,618 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSH Silent Auction</title>
+    <meta name="description" content="Bid on items and experiences to support Lucy S. Herring Elementary.">
+    <meta name="theme-color" content="#6E8348">
+    <link rel="icon" href="img/lsh-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            color-scheme: light;
+            --green: #6E8348;
+            --green-dark: #55673a;
+            --green-tint: #eef1e3;
+            --slate: #697D83;
+            --amber: #E59F2B;
+            --amber-tint: #fdf3df;
+            --red: #b3412f;
+            --red-tint: #fbeae6;
+            --ink: #26302f;
+            --bg: #fafaf5;
+            --surface: #ffffff;
+            --line: #e4e7d6;
+            --radius: 14px;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html:has(dialog[open]) { overflow: hidden; }
 
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #ffffff 0%, #ecefd0 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Montserrat', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        button, input { font: inherit; color: inherit; }
+        button { cursor: pointer; }
+        a { color: var(--green-dark); }
+        [hidden] { display: none !important; }
+
+        :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+        /* ---------- Top bar ---------- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo img {
-            max-width: 300px;
-            height: auto;
-        }
-
-        header {
-            text-align: center;
-            color: #697D83;
-            padding: 20px 20px 40px;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            font-weight: 700;
-            color: #6E8348;
-        }
-
-        header p {
-            font-size: 1.2rem;
-            opacity: 0.95;
-            color: #697D83;
-        }
-
-        .phone-explanation {
-            text-align: center;
-            color: #ef5a87;
-            margin-top: 15px;
-            font-weight: 700;
-            font-size: 1.75rem;
-            font-style: italic;
-        }
-
-        .auction-status {
-            background: rgba(229, 159, 43, 0.2);
-            color: #E59F2B;
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: inline-block;
-            margin-top: 15px;
-            font-weight: 600;
-        }
-
-        .auction-status.closed {
-            background: rgba(255,67,54,0.8);
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 20px;
-        }
-
-        .item-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-
-        .item-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .item-card.disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .item-card.disabled:hover {
-            transform: none;
-        }
-
-        .item-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            background: #f0f0f0;
-        }
-
-        .item-content {
-            padding: 20px;
-        }
-
-        .item-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .item-price {
-            font-size: 1.5rem;
-            color: #6E8348;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            transition: transform 0.2s ease;
-        }
-
-        .price-label {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: normal;
-        }
-
-        .bid-increment {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 15px;
-        }
-
-        .quantity-indicator {
-            font-size: 0.85rem;
-            color: #6E8348;
-            font-weight: 600;
-            margin-bottom: 10px;
+        .topbar .wrap {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 12px;
+            min-height: 60px;
         }
 
-        .quantity-indicator::before {
-            content: "📦";
-            font-size: 1rem;
-        }
+        .topbar img { width: 40px; height: 40px; flex: none; }
 
-        .bidder-identifier {
-            font-size: 0.85rem;
-            color: #1a2a4e;
-            background: #e6f9ff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            display: block;
-            margin-top: 10px;
-            font-weight: 600;
-            text-align: center;
-            border: 1px solid #00d9ff;
-        }
+        .topbar-title { font-weight: 700; font-size: 1.05rem; line-height: 1.2; flex: 1; min-width: 0; }
 
-        .top-bidders-container {
-            margin-top: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #dee2e6;
-        }
-
-        .top-bidders-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: #e9ecef;
-            cursor: pointer;
-            -webkit-user-select: none;
-            user-select: none;
-            transition: background 0.2s ease;
-        }
-
-        .top-bidders-header:hover {
-            background: #dee2e6;
-        }
-
-        .top-bidders-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .quantity-badge {
-            background: #6E8348;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 6px;
-        }
-
-        .dropdown-arrow {
+        .countdown {
+            flex: none;
+            text-align: right;
             font-size: 0.8rem;
-            color: #6c757d;
-            transition: transform 0.3s ease;
+            color: var(--slate);
+            line-height: 1.25;
         }
 
-        .dropdown-arrow.expanded {
-            transform: rotate(180deg);
+        .countdown strong {
+            display: block;
+            font-size: 1rem;
+            color: var(--green-dark);
+            font-variant-numeric: tabular-nums;
         }
 
-        .top-bidders-list {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
+        .countdown.soon strong { color: #a96a08; }
+        .countdown.closed strong { color: var(--red); }
 
-        .top-bidders-list.expanded {
-            max-height: 500px;
-        }
+        /* ---------- Intro ---------- */
+        .intro { padding: 28px 0 8px; }
 
-        .bidder-row {
+        .intro h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; margin-bottom: 8px; }
+
+        .intro p { color: var(--slate); max-width: 60ch; }
+
+        .how { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+
+        .how summary {
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
-            border-top: 1px solid #dee2e6;
-            font-size: 0.85rem;
         }
 
-        .bidder-row:hover {
-            background: #f8f9fa;
+        .how summary::-webkit-details-marker { display: none; }
+        .how summary::after { content: '+'; font-size: 1.3rem; color: var(--slate); line-height: 1; }
+        .how[open] summary::after { content: '–'; }
+
+        .how-body { padding: 0 16px 16px; color: #46504f; font-size: 0.95rem; }
+        .how-body ol { padding-left: 20px; margin-bottom: 12px; }
+        .how-body li { margin-bottom: 6px; }
+        .how-body p { max-width: none; color: inherit; margin-top: 8px; }
+
+        .demo-banner {
+            margin-top: 16px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--amber-tint);
+            border: 1px solid #f1d7a3;
+            font-size: 0.9rem;
         }
 
-        .bidder-rank {
-            font-weight: 700;
-            color: #6E8348;
-            min-width: 30px;
+        /* ---------- Filters ---------- */
+        .filters { padding: 20px 0 4px; }
+
+        .search {
+            width: 100%;
+            max-width: 420px;
+            padding: 11px 14px;
+            font-size: 1rem;
+            border: 1px solid #cfd4bd;
+            border-radius: 10px;
+            background: var(--surface);
         }
 
-        .bidder-amount {
-            font-weight: 600;
-            color: #212529;
-        }
-
-        .bidder-phone {
-            color: #6c757d;
-            font-family: monospace;
-        }
-
-        .no-bids-message {
-            padding: 12px;
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.85rem;
-            font-style: italic;
-        }
-
-        .item-buttons {
+        .chips {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-top: 12px;
+            padding-bottom: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
+
+        .chips::-webkit-scrollbar { display: none; }
+
+        .chip {
+            flex: none;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid #cfd4bd;
+            background: var(--surface);
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .chip[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+
+        .result-count { font-size: 0.85rem; color: var(--slate); margin: 8px 0 12px; }
+
+        /* ---------- Grid + cards ---------- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .card:hover { border-color: #c3cba5; box-shadow: 0 4px 14px rgba(38, 48, 47, 0.08); }
+
+        .card-photo { position: relative; width: 100%; aspect-ratio: 4 / 3; background: var(--green-tint); }
+
+        .card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--green);
+        }
+
+        .badge.outbid { background: var(--red); }
+
+        .card-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; width: 100%; }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-qty { font-size: 0.8rem; color: var(--slate); font-weight: 500; }
+
+        .card-price { margin-top: auto; padding-top: 6px; }
+
+        .price-label { display: block; font-size: 0.75rem; color: var(--slate); }
+
+        .price {
+            display: inline-block;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--green-dark);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .price.bump { animation: bump 0.7s ease; }
+
+        @keyframes bump {
+            30% { color: var(--amber); transform: scale(1.06); }
+        }
+
+        .card-bidder { font-size: 0.8rem; color: var(--slate); min-height: 1.2em; }
+
+        .empty { grid-column: 1 / -1; text-align: center; color: var(--slate); padding: 40px 0; }
+
+        /* ---------- Item sheet ---------- */
+        dialog {
+            border: 0;
+            padding: 0;
+            margin: auto;
+            width: min(560px, 100vw);
+            max-height: min(92dvh, 900px);
+            border-radius: 18px;
+            background: var(--surface);
+            color: var(--ink);
+            overflow: hidden;
+        }
+
+        dialog[open] { display: flex; flex-direction: column; animation: rise 0.2s ease; }
+
+        dialog::backdrop { background: rgba(38, 48, 47, 0.55); }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(16px); }
+        }
+
+        .sheet-scroll { overflow-y: auto; overscroll-behavior: contain; }
+
+        .sheet-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 0;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .sheet-photo { background: var(--green-tint); }
+
+        .sheet-photo img { display: block; width: 100%; max-height: 320px; object-fit: contain; }
+
+        .sheet-body { padding: 20px; }
+
+        .sheet-category { font-size: 0.8rem; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.04em; }
+
+        .sheet-title { font-size: 1.4rem; line-height: 1.25; margin: 2px 0 10px; }
+
+        .sheet-desc { color: #46504f; white-space: pre-line; overflow-wrap: anywhere; font-size: 0.95rem; }
+
+        .sheet-desc.folded { max-height: 7.4em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 12px;
+            margin: 18px 0;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--green-tint);
+        }
+
+        .status .price { font-size: 1.7rem; }
+
+        .status-side { text-align: right; font-size: 0.85rem; color: #46504f; }
+
+        .winners { margin: -6px 0 18px; font-size: 0.9rem; }
+
+        .winners h3 { font-size: 0.85rem; color: var(--slate); font-weight: 600; margin-bottom: 6px; }
+
+        .winners li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--line);
+            list-style: none;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .winners li.me { font-weight: 700; color: var(--green-dark); }
+
+        .notice { padding: 12px 14px; border-radius: 10px; font-size: 0.92rem; margin-bottom: 16px; }
+        .notice.good { background: var(--green-tint); color: #3d4a2a; }
+        .notice.warn { background: var(--amber-tint); color: #6b4a0c; }
+        .notice.bad { background: var(--red-tint); color: #7a2a1d; }
+
+        .step h3 { font-size: 1.05rem; margin-bottom: 12px; }
+
+        .quick { display: flex; gap: 8px; margin-bottom: 12px; }
+
+        .quick button {
+            flex: 1;
+            padding: 12px 6px;
+            border-radius: 10px;
+            border: 1.5px solid var(--green);
+            background: var(--surface);
+            color: var(--green-dark);
+            font-weight: 700;
+            font-size: 1.05rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .quick button[aria-pressed="true"] { background: var(--green); color: #fff; }
+
+        .field { margin-bottom: 14px; }
+
+        .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+
+        .field input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1.5px solid #cfd4bd;
+            border-radius: 10px;
+            background: var(--surface);
+        }
+
+        .field input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(110, 131, 72, 0.2); }
+
+        .field.invalid input { border-color: var(--red); }
+
+        .field-hint { font-size: 0.8rem; color: var(--slate); margin-top: 4px; }
+
+        .field-error { font-size: 0.82rem; color: var(--red); margin-top: 4px; display: none; }
+
+        .field.invalid .field-error { display: block; }
+
+        .amount-wrap { position: relative; }
+        .amount-wrap span { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--slate); }
+        .amount-wrap input { padding-left: 26px; font-weight: 600; }
+
+        .bidding-as {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .link-btn { background: none; border: 0; color: var(--green-dark); font-weight: 600; text-decoration: underline; font-size: 0.9rem; padding: 4px; }
+
+        /* Honeypot for bots */
+        .hp { position: absolute; left: -9999px; top: -9999px; }
 
         .btn {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .btn-details {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-details:hover {
-            background: #e0e0e0;
-            transform: scale(1.05);
-        }
-
-        .btn-bid {
-            background: linear-gradient(135deg, #6E8348 0%, #5a6b3a 100%);
-            color: white;
-            font-weight: 600;
-        }
-
-        .btn-bid:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(110, 131, 72, 0.4);
-        }
-
-        .btn-bid:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            animation: fadeIn 0.3s ease;
-            overflow-y: auto;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            position: relative;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .close-btn {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #999;
-            cursor: pointer;
-            transition: color 0.3s ease;
-            background: none;
-            border: none;
-        }
-
-        .close-btn:hover {
-            color: #333;
-        }
-
-        .modal-title {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #333;
-            padding-right: 40px;
-        }
-
-        .modal-description {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .modal-price {
-            font-size: 1.8rem;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .form-group input.error {
-            border-color: #ff4444;
-        }
-
-        /* Hidden honeypot field for bot protection */
-        .website-field {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        }
-
-        .error-message {
-            color: #ff4444;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .submit-btn, .confirm-btn, .edit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #E59F2B 0%, #d18a1f 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 10px;
-        }
-
-        .submit-btn:hover, .confirm-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(229, 159, 43, 0.4);
-        }
-
-        .submit-btn:disabled, .confirm-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .edit-btn {
-            background: #6c757d;
-        }
-
-        .edit-btn:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-        .success-message {
-            background: #4CAF50;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error-banner {
-            background: #ff4444;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .confirmation-section {
-            background: #f8f9fa;
-            padding: 20px;
+            padding: 14px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            border: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
         }
 
-        .confirmation-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
+        .btn-primary { background: var(--green); color: #fff; }
+        .btn-primary:hover { background: var(--green-dark); }
+        .btn-primary:disabled { background: #b9bfa9; cursor: not-allowed; }
+        .btn-quiet { background: none; color: var(--slate); font-weight: 600; margin-top: 6px; }
 
-        .confirmation-item:last-child {
-            border-bottom: none;
-        }
+        .review { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 14px; }
 
-        .confirmation-label {
-            font-weight: 600;
-            color: #495057;
-        }
+        .review div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 14px; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+        .review div:last-child { border-bottom: 0; }
+        .review dt { color: var(--slate); flex: none; }
+        .review dd { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+        .review .big dd { font-size: 1.3rem; color: var(--green-dark); }
 
-        .confirmation-value {
-            color: #212529;
-        }
+        .fine { font-size: 0.82rem; color: var(--slate); margin-bottom: 14px; }
 
-        .bid-amount-pill {
-            background: #E59F2B;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            font-size: 1.2rem;
-            font-weight: bold;
+        .done { text-align: center; padding: 8px 0; }
+        .done-mark {
+            width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 50%;
+            background: var(--green); color: #fff; font-size: 1.8rem; line-height: 56px;
         }
+        .done h3 { font-size: 1.25rem; margin-bottom: 6px; }
+        .done p { color: #46504f; margin-bottom: 18px; font-size: 0.95rem; }
 
-        .loading-indicator {
-            text-align: center;
-            color: rgb(0, 0, 0);
-            padding: 20px;
-            font-size: 1.1rem;
-        }
+        footer { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size: 0.85rem; color: var(--slate); text-align: center; }
 
-        .rate-limit-warning {
-            background: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 0.9rem;
-        }
+        /* ---------- Phones ---------- */
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .card-body { padding: 10px; gap: 4px; }
+            .card-title { font-size: 0.9rem; }
+            .price { font-size: 1.15rem; }
+            .badge { top: 6px; left: 6px; font-size: 0.7rem; padding: 3px 8px; }
+            .search { max-width: none; }
+            .topbar-title { font-size: 0.95rem; }
 
-        /* Visual pulse when price changes */
-        .price-updated {
-            animation: pricePulse 700ms ease;
-        }
-
-        @keyframes pricePulse {
-            0% { transform: scale(1); color: #6E8348; }
-            30% { transform: scale(1.06); color: #5a6b3a; }
-            100% { transform: scale(1); color: #6E8348; }
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: 60px;
-            color: #697D83;
-            font-size: 0.9rem;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        footer a {
-            color: #6E8348;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
+            dialog {
+                margin: auto 0 0;
+                width: 100vw;
+                max-width: 100vw;
+                max-height: 94dvh;
+                border-radius: 18px 18px 0 0;
             }
 
-            .items-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 20px;
-            }
+            .sheet-photo img { max-height: 240px; }
+        }
 
-            .modal-content {
-                margin: 10% auto;
-                padding: 20px;
-            }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="lsh-logo.png" alt="LSH PT Logo" onerror="this.style.display='none'">
-        </div>
-        <header>
-            <h1>LSH Silent Auction 2025</h1>
-            <p>Bid on amazing items and support a great cause!</p>
-            <div class="auction-status" id="auctionStatus">Auction is OPEN</div>
-            <p class="phone-explanation">The last 4 digits of the highest bidder's phone number are shown with each item.</p>
-        </header>
-
-        <div class="loading-indicator" id="loadingIndicator" style="display: none;">Loading current bids...</div>
-
-        <div style="max-width: 900px; margin: 0 auto 50px; padding: 20px; background: #fff3cd; border-left: 4px solid #E59F2B; border-radius: 8px;">
-            <p style="color: #856404; line-height: 1.6; margin: 0; font-size: 0.95rem;">
-                <strong>Important:</strong> All funds raised goes toward the Lucy S. Herring Elementary Parent Team initiatives including teacher appreciation, teacher mini-grants, class field trips, and other school needs. Highest bidders will be notified at close of auction on December 7, 2025 and will be sent official communication from the Lucy S. Herring Parent Team on how to remit payment for their item(s) online. Payment must be made before the item is available to be received. If it's a physical item, the winner must be in or come to the Asheville-area to retrieve the item, all to be coordinated after payment is received. Thanks and please reach out to Mindy Smith at <a href="mailto:herringparentteam@gmail.com" style="color: #856404; text-decoration: underline;">herringparentteam@gmail.com</a> with any questions.
-            </p>
-        </div>
-
-        <div class="items-grid" id="itemsGrid"></div>
-
-        <footer>
-            <p>Site created by Scott McFall with the help of AI. Contact: <a href="mailto:scott@scottmcfall.com">scott@scottmcfall.com</a> for inquiries.</p>
-        </footer>
-    </div>
-
-    <!-- Details Modal -->
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
-            <h2 class="modal-title" id="modalTitle"></h2>
-            <p class="modal-description" id="modalDescription"></p>
-            <div class="modal-price">
-                <span class="price-label">Current Bid: </span>
-                <span id="modalPrice"></span>
-            </div>
+    <div class="topbar">
+        <div class="wrap">
+            <img src="img/lsh-logo.png" alt="" onerror="this.hidden = true">
+            <div class="topbar-title" id="siteTitle">LSH Silent Auction</div>
+            <div class="countdown" id="countdown" aria-live="off"></div>
         </div>
     </div>
 
-    <!-- Bid Form Modal -->
-    <div id="bidModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeBidModal()">&times;</button>
-            <h2 class="modal-title">Place Your Bid</h2>
-            <p class="modal-description" id="bidItemName"></p>
-            <div class="modal-price">
-                <span class="price-label">Current Bid: </span>
-                <span id="bidCurrentPrice"></span>
+    <main class="wrap">
+        <section class="intro">
+            <h1 id="headline">LSH Silent Auction</h1>
+            <p id="tagline"></p>
+
+            <details class="how">
+                <summary>How bidding works</summary>
+                <div class="how-body">
+                    <ol>
+                        <li>Tap any item to see the details and place a bid. You'll get a confirmation email for every bid.</li>
+                        <li>Each item shows the last 4 digits of the leading bidder's phone number, so you can tell at a glance whether you're still winning.</li>
+                        <li>If you're outbid, come back and bid again any time before <strong id="closesAt"></strong>.</li>
+                        <li>Some items have more than one available — the top bidders each win one.</li>
+                    </ol>
+                    <p>All funds raised go toward <span class="org-name"></span> initiatives including teacher appreciation, teacher mini-grants, class field trips, and other school needs. Winning bidders will be emailed when the auction closes, followed by a message from the <span class="org-name"></span> explaining how to pay online. Payment must be received before an item is released. Physical items must be picked up in the Asheville area; pickup is coordinated after payment.</p>
+                    <p>Questions? Contact <span id="contactName"></span> at <a id="contactLink" href="#"></a>.</p>
+                </div>
+            </details>
+
+            <div class="demo-banner" id="demoBanner" hidden><strong>Demo mode.</strong> No backend is connected, so bids stay in this browser tab and disappear on reload.</div>
+        </section>
+
+        <section class="filters" aria-label="Find items">
+            <input class="search" id="search" type="search" placeholder="Search items" aria-label="Search items" autocomplete="off">
+            <div class="chips" id="chips" role="group" aria-label="Filter items"></div>
+            <div class="result-count" id="resultCount" aria-live="polite"></div>
+        </section>
+
+        <section class="grid" id="grid" aria-label="Auction items"></section>
+    </main>
+
+    <footer>
+        <div class="wrap">Site created by Scott McFall with the help of AI · <a href="mailto:scott@scottmcfall.com">scott@scottmcfall.com</a></div>
+    </footer>
+
+    <dialog id="sheet" aria-labelledby="sheetTitle">
+        <button class="sheet-close" id="sheetClose" aria-label="Close">&times;</button>
+        <div class="sheet-scroll">
+            <div class="sheet-photo"><img id="sheetImg" alt=""></div>
+            <div class="sheet-body">
+                <div class="sheet-category" id="sheetCategory"></div>
+                <h2 class="sheet-title" id="sheetTitle"></h2>
+                <p class="sheet-desc" id="sheetDesc"></p>
+                <button type="button" class="link-btn" id="descMore" hidden>Read more</button>
+
+                <div class="status">
+                    <div>
+                        <span class="price-label" id="sheetPriceLabel"></span>
+                        <span class="price" id="sheetPrice"></span>
+                    </div>
+                    <div class="status-side" id="sheetSide"></div>
+                </div>
+
+                <div class="winners" id="sheetWinners" hidden></div>
+
+                <div class="notice" id="sheetNotice" hidden></div>
+
+                <!-- Step 1: enter bid -->
+                <form class="step" id="stepForm" novalidate>
+                    <h3>Place your bid</h3>
+                    <div class="quick" id="quick" role="group" aria-label="Quick bid amounts"></div>
+
+                    <div class="field" id="fieldAmount">
+                        <label for="bidAmount">Your bid</label>
+                        <div class="amount-wrap">
+                            <span>$</span>
+                            <input id="bidAmount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
+                        </div>
+                        <div class="field-hint" id="amountHint"></div>
+                        <div class="field-error" id="amountError"></div>
+                    </div>
+
+                    <div class="bidding-as" id="biddingAs" hidden>
+                        <span id="biddingAsText"></span>
+                        <button type="button" class="link-btn" id="changeInfo">Change</button>
+                    </div>
+
+                    <div id="infoFields">
+                        <div class="field" id="fieldName">
+                            <label for="fullName">Full name</label>
+                            <input id="fullName" type="text" autocomplete="name" maxlength="50" required>
+                            <div class="field-error">Please enter your first and last name.</div>
+                        </div>
+                        <div class="field" id="fieldEmail">
+                            <label for="email">Email</label>
+                            <input id="email" type="email" autocomplete="email" maxlength="100" required>
+                            <div class="field-error">Please enter a valid email address.</div>
+                        </div>
+                        <div class="field" id="fieldPhone">
+                            <label for="phone">Mobile number</label>
+                            <input id="phone" type="tel" autocomplete="tel" placeholder="828-555-1234" required>
+                            <div class="field-hint">Only the last 4 digits are shown publicly.</div>
+                            <div class="field-error">Please enter a 10-digit phone number.</div>
+                        </div>
+                    </div>
+
+                    <input class="hp" type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+                    <button type="submit" class="btn btn-primary">Review bid</button>
+                </form>
+
+                <!-- Step 2: confirm -->
+                <div class="step" id="stepReview" hidden>
+                    <h3>Confirm your bid</h3>
+                    <dl class="review">
+                        <div><dt>Item</dt><dd id="reviewItem"></dd></div>
+                        <div class="big"><dt>Your bid</dt><dd id="reviewAmount"></dd></div>
+                        <div><dt>Name</dt><dd id="reviewName"></dd></div>
+                        <div><dt>Email</dt><dd id="reviewEmail"></dd></div>
+                    </dl>
+                    <p class="fine">A bid is a commitment to pay if you win. Your confirmation will go to the email above, so please check it's right.</p>
+                    <button type="button" class="btn btn-primary" id="confirmBtn">Confirm bid</button>
+                    <button type="button" class="btn btn-quiet" id="backBtn">Back</button>
+                </div>
+
+                <!-- Step 3: result -->
+                <div class="step done" id="stepDone" hidden>
+                    <div class="done-mark">✓</div>
+                    <h3 id="doneTitle"></h3>
+                    <p id="doneText"></p>
+                    <button type="button" class="btn btn-primary" id="doneBtn">Keep browsing</button>
+                </div>
+
+                <div class="notice warn" id="closedNotice" hidden>Bidding has closed. Thank you for supporting the auction!</div>
             </div>
-            
-            <div class="success-message" id="successMessage">
-                🎉 Your bid has been submitted successfully! You will receive a confirmation email shortly.
-            </div>
-
-            <div class="error-banner" id="errorBanner"></div>
-
-            <div class="rate-limit-warning" id="rateLimitWarning">
-                ⚠️ You've submitted multiple bids recently. Please wait a moment before bidding again.
-            </div>
-
-            <form id="bidForm">
-                <div class="form-group">
-                    <label for="fullName">Full Name *</label>
-                    <input type="text" id="fullName" name="fullName" maxlength="50" required>
-                    <span class="error-message" id="nameError">Please enter your name</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" maxlength="100" required>
-                    <span class="error-message" id="emailError">Please enter a valid email</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" name="phone" placeholder="555-123-4567" required>
-                    <span class="error-message" id="phoneError">Please enter a valid phone number</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="bidAmount">Bid Amount ($) *</label>
-                    <input type="number" id="bidAmount" name="bidAmount" min="1" step="1" required>
-                    <span class="error-message" id="bidError">Please enter a valid bid amount</span>
-                </div>
-
-                <!-- Honeypot field for bot protection -->
-                <input type="text" name="website" class="website-field" tabindex="-1" autocomplete="off">
-
-                <button type="submit" class="submit-btn" id="submitBtn">Review Bid</button>
-            </form>
         </div>
-    </div>
+    </dialog>
 
-    <!-- Confirmation Modal -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
-            <h2 class="modal-title">⚠️ Confirm Your Bid</h2>
-            <p class="modal-description">Please review your bid details carefully before confirming:</p>
-            
-            <div class="confirmation-section">
-                <div class="confirmation-item">
-                    <span class="confirmation-label">Item:</span>
-                    <span class="confirmation-value" id="confirmItemName"></span>
-                </div>
-                <div class="confirmation-item">
-                    <span class="confirmation-label">Your Email:</span>
-                    <span class="confirmation-value" id="confirmEmail"></span>
-                </div>
-                <div class="confirmation-item">
-                    <span class="confirmation-label">Your Bid:</span>
-                    <span class="bid-amount-pill" id="confirmBidAmount"></span>
-                </div>
-            </div>
-
-            <p style="color: #6c757d; font-size: 0.95rem; margin: 20px 0;">
-                ✉️ A confirmation email will be sent to the address shown above. 
-                Please verify it's correct before confirming.
-            </p>
-
-            <button class="confirm-btn" id="confirmBtn" onclick="confirmAndSubmitBid()">Confirm Bid</button>
-            <button class="edit-btn" onclick="editBid()">← Edit Bid</button>
-        </div>
-    </div>
-
+    <script src="config.js"></script>
     <script>
-        // CONFIGURATION: Replace with your actual Google Apps Script Web App URL
-        // IMPORTANT: Use the /exec URL, NOT the googleusercontent.com URL!
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywQJkfZjWudhqoNatVWvAFWOwz8ZvDH-LzWZM1bpt4zUWIomgJg9lFcLeCa2OV3imq-w/exec';
-        
-        // Auction configuration
-        const AUCTION_END_TIME = new Date('2025-12-08T23:59:59'); // Set your auction end time
-        
-        // Item data - Update this with your actual items
-        // Optional 'quantity' field for multi-winner items (defaults to 1)
-        const items = [
-            {
-                id: 'item0',
-                name: 'AI Consultation',
-                description: '1 hour consultation to see how AI can help you and your business GROW! Email scott@scottmcfall.com to schedule.',
-                startingBid: 30,
-                imageUrl: 'Images/scott1.jpg',
-            },
-            {
-                id: 'item1',
-                name: '1 Hour Dietitian Consultation',
-                description: '1 hour consultation with a Registered Dietitian Nutritionist.',
-                startingBid: 60,
-                imageUrl: 'Images/1 hour consultation with a Registered Dietitian Nutritionist .jpeg',
-            },
-            {
-                id: 'item2',
-                name: 'Orange Peel Concert Package',
-                description: 'Gift Certificate good for 2 Tickets to any show at The Orange Peel* and merch bundle. The Orange Peel.',
-                startingBid: 40,
-                imageUrl: 'Images/Orange Peel.jpg',
-            },
-            {
-                id: 'item3',
-                name: 'rEvolve Gift Card - $100 value',
-                description: '1 $100 gift card to rEvolve buy•sell•trade // instagram @revolve_merc',
-                startingBid: 10,
-                imageUrl: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=400',
-                quantity: 2
-            },
-            {
-                id: 'item4',
-                name: 'Kids Yoga & Art Session',
-                description: '1 - 1:1 Session with Asheville Kids Yoga & Art. http://www.ashevillekidsyogaandart.com',
-                startingBid: 20,
-                imageUrl: 'Images/1 - 1-1 Session with Asheville Kids Yoga & Art .jpg',
-            },
-            {
-                id: 'item5',
-                name: 'Homemade Cookies - 3 Months',
-                description: 'A monthly batch of homemade cookies! One batch (about twenty cookies) of your favorite cookie from "100 Cookies" by Sarah Kieffer once a month for three months from January through March.',
-                startingBid: 20,
-                imageUrl: 'Images/Homemade cookies.jpg',
-            },
-            {
-                id: 'item6',
-                name: 'Sommelier Wine Tasting',
-                description: 'Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided. Led by Cara Fuseler, Certified Sommelier.',
-                startingBid: 300,
-                imageUrl: 'Images/Sommelier led wine tasting & class for up to 6 people - theme of your choosing, wine provided.JPEG',
-            },
-            {
-                id: 'item7',
-                name: 'Wagner Family Wines',
-                description: '2 bottles of wine from the Wagner Family: Caymus California Cabernet & Mer Soleil Chardonnay.',
-                startingBid: 45,
-                imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&q=80',
-            },
-            {
-                id: 'item8',
-                name: 'Jeeper Champagne',
-                description: '2 bottles of Champagne Jeeper: Blanc de Blancs & Premier Cru Brut.',
-                startingBid: 75,
-                imageUrl: 'https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&q=80',
-            },
-            {
-                id: 'item9',
-                name: 'French Wine Collection',
-                description: '3 bottles of French wine (red, white, and rosé): Provence Rosé, Sancerre Blanc, and Bordeaux.',
-                startingBid: 45,
-                imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&q=80',
-            },
-            {
-                id: 'item10',
-                name: 'Italian Wine Duo',
-                description: '2 Italian wines: Pinot Grigio and a red blend from Piedmont.',
-                startingBid: 20,
-                imageUrl: 'Images/2 wines.png',
-            },
-            {
-                id: 'item11',
-                name: 'California Chardonnay Collection',
-                description: 'Explore Chardonnay with 3 bottles from California.',
-                startingBid: 25,
-                imageUrl: 'Images/Calironia Chardonnay Collection.jpg',
-            },
-            {
-                id: 'item12',
-                name: 'Private Tutoring Sessions',
-                description: '2 hours of private tutoring, all ages, most subjects covered. Blue Ridge Tutoring www.blueridgetutoring.com',
-                startingBid: 25,
-                imageUrl: 'Images/2 hours of private tutoring, all ages, most subjects covered.jpeg',
-            },
-            {
-                id: 'item13',
-                name: '187 Killer Pads Set',
-                description: '187 Six-Pack Pad Set - Adult sized Wrist, Knee, Elbow Pads. 187 Killer Pads.',
-                startingBid: 10,
-                imageUrl: 'Images/187 Knee Pads.png',
-            },
-            {
-                id: 'item14',
-                name: 'Fresh Cinnamon Rolls',
-                description: '12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).',
-                startingBid: 10,
-                imageUrl: 'Images/12 Cinnamon Rolls from scratch with Cream Cheese Icing (baked, or unbaked with instructions).jpeg',
-            },
-            {
-                id: 'item15',
-                name: 'Kendra Scott Necklace',
-                description: 'Kendra Scott Gold Sun Pendant Necklace.',
-                startingBid: 40,
-                imageUrl: 'Images/Kendra_Scott_Gold_Sun_Pendant_Necklace_.jpg',
-            },
-            {
-                id: 'item16',
-                name: 'Handmade Large Bag',
-                description: 'Hand made large bag (15in. Across, 14in. Wide and 13 in. Long/deep.) by Daniele O Designs, danieleodesigns.com',
-                startingBid: 50,
-                imageUrl: 'Images/Hand made large bag.jpg',
-            },
-            {
-                id: 'item17',
-                name: 'Cameras Note Cards',
-                description: '"Cameras" Set of four blank note cards & envelopes. Digital design, inkjet print, hand-painted watercolor, (4.5" x 6"). Rhododendron Press',
-                startingBid: 10,
-                imageUrl: 'Images/cameras-cards.jpg',
-            },
-            {
-                id: 'item18',
-                name: 'Skates Note Cards',
-                description: '"Skates" Set of four blank note cards & envelopes. Digital design, inkjet print, hand-painted watercolor, paint pen, (4.5" x 6"). Rhododendron Press',
-                startingBid: 10,
-                imageUrl: 'Images/skates-cards.jpg',
-            },
-            {
-                id: 'item19',
-                name: 'Lace Note Cards',
-                description: '"Lace" Set of four blank note cards & envelopes. Cyanotype prints with lace, (4.5" x 6"). Rhododendron Press',
-                startingBid: 10,
-                imageUrl: 'Images/lace-cards.jpg',
-            },
-            {
-                id: 'item20',
-                name: 'Jalapeno Jelly Jar',
-                description: '8oz jar of homemade jalapeno jelly. Perfect for pairing with cheese or as a unique gift!',
-                startingBid: 5,
-                imageUrl: 'Images/jalapeno-jelly.jpg',
-                quantity: 12,
-            },
-            {
-                id: 'item21',
-                name: 'Blue Beaded Earrings',
-                description: 'A pair of handmade drop earrings featuring a small gold stud with a dangling bead arrangement, including a dark bead, gold spacers, and a larger marbled gray-blue bead at the bottom; simple, subtle, and sophisticated. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 12,
-                imageUrl: 'Images/jewelry-blue-earrings.jpg',
-            },
-            {
-                id: 'item22',
-                name: 'Purple Dangle Earrings',
-                description: 'A pair of handmade dangle earrings featuring a gold hook and a vertical stack of irregular, translucent gemstone chips in pastel shades of purple, green, and clear, separated by shiny gold spacer beads, a delicate, colorful, and elegant set with a natural, boho touch. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 10,
-                imageUrl: 'Images/purple_dangle_earrings.jpg',
-            },
-            {
-                id: 'item23',
-                name: 'LSH-Themed Bracelet',
-                description: 'Beaded bracelet features glossy turquoise beads paired with gold accents. Three colorful circular charms hang from the front—yellow with an L, light blue with an S, and red with an H—representing Lucy S. Herring Elementary School of Ecology, bright, playful, and school-spirited. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 10,
-                imageUrl: 'Images/jewelry-lsh-bracelet.jpg',
-            },
-            {
-                id: 'item24',
-                name: 'Blue-Black Metallic Bracelet',
-                description: 'The bracelet features dark blue evil-eye beads, silver spacer beads, and a silver Hamsa hand charm. This bracelet is a symbol of a protective, symbolic, and handcrafted look. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 12,
-                imageUrl: 'Images/jewelry-blue-black-bracelet.jpg',
-            },
-            {
-                id: 'item25',
-                name: 'Packaged Turquoise Bracelet',
-                description: 'A soft aqua beads bracelet mixed with multicolored accent beads in shades of white, blue, peach, and purple, along with small metallic spacers that are bright, delicate, and artisan-crafted. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 12,
-                imageUrl: 'Images/jewelry-turquoise-packaged.jpg',
-            },
-            {
-                id: 'item26',
-                name: 'Big Brown Stone Bracelet',
-                description: 'Large polished brown stone is the centerpiece. The bracelet is accented with rounded tiger\'s-eye beads and antique gold-toned spacers, earthy, bold, and elegant. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 12,
-                imageUrl: 'Images/jewelry-brown-stone.jpg',
-            },
-            {
-                id: 'item27',
-                name: 'Turquoise Bracelet with Feather',
-                description: 'A turquoise-toned beaded bracelet that features frosted teal beads, silver accents, and small dangling charms, including a leaf and a ginkgo-style charm that is elegant, earthy, and softly bohemian. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 10,
-                imageUrl: 'Images/jewelry-turquoise-feather.jpg',
-            },
-            {
-                id: 'item28',
-                name: 'Brown Stone Vibes Bracelet',
-                description: 'Earthy-toned, round and disc-shaped beads in shades of brown, black, and reddish stone, accented with warm copper spacers displaying a rustic, natural look. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 10,
-                imageUrl: 'Images/jewelry-brown-vibes.jpg',
-            },
-            {
-                id: 'item29',
-                name: 'Green Nature Vibes Bracelet',
-                description: 'A multi-strand bracelet that features earthy green and amber-toned beads, accented with decorative bronze spacers, and includes one macramé-style woven strand in tan cord with a natural and bohemian vibe. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 12,
-                imageUrl: 'Images/jewelry-green-vibes.jpg',
-            },
-            {
-                id: 'item30',
-                name: 'Blue Bracelet with Hand Wings',
-                description: 'The bracelet features deep navy-blue round beads paired with silver spacers, and it includes two dangling silver charms—a Hamsa hand and small leaves displaying a simple, symbolic, and elegant look. Handcrafted by Fiddle & Thread KSQ.',
-                startingBid: 12,
-                imageUrl: 'Images/jewelry-blue-wings.jpg',
-            },
-            {
-                id: 'item31',
-                name: 'Holiday Pinecone Wreath',
-                description: 'Handmade Holiday Pinecone 24" Wreath with wreath storage container. By Amy Murray',
-                startingBid: 20,
-                imageUrl: 'Images/wreath.jpg',
-            },
-            {
-                id: 'item32',
-                name: 'Crocheted Yarn Pumpkins',
-                description: 'Handmade Crocheted Yarn Pumpkins. Made by Mandy Antczak (Josie and Nolan\'s Grandma)',
-                startingBid: 10,
-                imageUrl: 'Images/pumpkins.jpg',
-            },
-            {
-                id: 'item33',
-                name: 'rEvolve Gift Basket',
-                description: '1. Daisy rug\n2. Twist perfume (Mountain)\n3. Hand forged brass earrings made by local artist, Callisa Lawn\n4. Cat Kitchen print by local artist, Sid Worsham\n5. Large pink lidded ceramic vessel by local potter, Katlyn Swords\n6. Handmade light pink scarf\n7. Croissant air freshener\n8. Cute pair of socks\n9. Pair of strawberry hair clips',
-                startingBid: 10,
-                imageUrl: 'Images/gift-basket.jpg',
-            },
-            {
-                id: 'item34',
-                name: 'LSH Tote Bag',
-                description: 'LSH tote bag (2 autographed by Mr. Gibbs available)',
-                startingBid: 10,
-                imageUrl: 'Images/lsh-tote.jpg',
-                quantity: 4,
-            },
-            {
-                id: 'item35',
-                name: 'Tabletop Roleplaying Game Session',
-                description: 'Introduction to Tabletop Roleplaying Games — Private Session. Discover the fun, creativity, and collaboration of tabletop roleplaying games in this family-friendly "Introduction to TTRPGs" experience! Perfect for beginners of all ages (readers who can do basic arithmetic), this 3–4 hour session teaches what tabletop roleplaying games are, how they connect to classics like Dungeons & Dragons, and how to jump right into playing a simple, rules-light adventure. Your host is an experienced Game Master who provides everything needed for the session—just bring your imagination and enthusiasm! What\'s included: Overview of TTRPGs, Guided character creation, Clear rules explanation, A fun beginner-friendly adventure, All materials provided. Session Details: Length 3–4 hours, Suitable for families/kids/adults or solo, No experience required. Scheduling: Weeknights 7pm–11pm start, Sundays 10am–5pm start. Unavailable: Nov 24–30 and Dec 22–Jan 1. A $20/person value for a multi-hour private experience!',
-                startingBid: 40,
-                imageUrl: 'Images/rpg.jpg',
-                quantity: 3,
-            },
-            {
-                id: 'item36',
-                name: 'Stained Glass Axolotl',
-                description: 'Handmade stained glass axolotl by local artist. www.resin8light.com',
-                startingBid: 15,
-                imageUrl: 'Images/axolotl.jpg',
-            },
-            {
-                id: 'item37',
-                name: 'Coffee Lovers Bundle',
-                description: 'Coffee Lovers\' Bundle from Cooperative Coffee includes: a tasting box with four coffees (roughly $80 value, before tax), two colorful diner mugs ($24 value) and two \'tickets\' to a coffee cupping. https://cooperativecoffeeroasters.com/',
-                startingBid: 80,
-                imageUrl: 'Images/coffee-bundle.jpg',
-                quantity: 2,
-            },
-            {
-                id: 'item38',
-                name: 'Hand Crafted Gift Basket',
-                description: 'Handcrafted gift basket - made with locally sourced materials and full of sweet holiday treats from Appalachian Craft Baskets. https://appalachiancraftbaskets.com',
-                startingBid: 20,
-                imageUrl: 'Images/appgift.jpg',
-            },
-            {
-                id: 'item39',
-                name: 'Three Christmas Ornaments',
-                description: 'Set of three handmade felted Christmas ornaments.',
-                startingBid: 30,
-                imageUrl: 'Images/Felt Ornament Balls.jpeg',
-            },
-            {
-                id: 'item40',
-                name: 'Xmas Flamingo Ornament',
-                description: 'Handmade felted Christmas flamingo ornament.',
-                startingBid: 10,
-                imageUrl: 'Images/Felt Flamingo.jpeg',
-            },
-            {
-                id: 'item41',
-                name: 'Soccer Ball Ornament',
-                description: 'Handmade felted soccer ball ornament.',
-                startingBid: 8,
-                imageUrl: 'Images/Felt Soccer Ball.jpeg',
-            },
-            {
-                id: 'item42',
-                name: 'Professor Bunny Ornament',
-                description: 'Handmade felted professor bunny ornament.',
-                startingBid: 10,
-                imageUrl: 'Images/Felt Professor Bunny.jpeg',
-            },
-            {
-                id: 'item43',
-                name: 'Avocado Ornament',
-                description: 'Handmade felted avocado ornament.',
-                startingBid: 10,
-                imageUrl: 'Images/Felt Avocado.jpeg',
-            },
-            {
-                id: 'item44',
-                name: 'Bad Bunny Ornament',
-                description: 'Handmade felted Bad Bunny ornament.',
-                startingBid: 8,
-                imageUrl: 'Images/Felt Bad Bunny.jpeg',
-            },
-            {
-                id: 'item45',
-                name: 'Mini Christmas Photo Session',
-                description: 'Professional mini Christmas photo session with Ashlyn Davis Photography.',
-                startingBid: 75,
-                imageUrl: 'Images/Mini Christmas Photo Session.jpeg',
-            },
-            {
-                id: 'item46',
-                name: 'Cabo Card Game Deck',
-                description: 'Your new favorite card game! Cabo is fast, fun, and easy to learn – perfect for family game night, in the stands at soccer practice, or killing time in homeroom. Simple, fast-paced, and actually fun – for parents, kids, and grandparents alike. Quick and portable, Cabo gives you a way to connect in real time, anywhere you go.\n\nEach Player starts with four face-down cards and only partial knowledge of what they\'re holding. Swap, Spy, Peek, and draw your way to the lowest score. Call "Cabo" when you think you\'ve won.\n\n• 2-5 Players (more with multiple decks)\n• Ages 8+\n• Learn in under 5 minutes\n• Full game takes 30 minutes\n• Rounds are as quick as 5 minutes\n• Great for travel, game night, classrooms, and more.\n• Made in Asheville\n• Original artwork by Raleigh artist Adam Peele\n• Printed in USA\n\nCompany: Shareful Games, LLC\nWebsite: www.cabogame.com',
-                startingBid: 2,
-                imageUrl: 'Images/cabo.jpg',
-                quantity: 6,
-            },
-        ];
+        // Items, dates and the backend URL live in config.js.
+        const END_TIME = new Date(AUCTION.endTime);
+        const DEMO = !AUCTION.scriptUrl || new URLSearchParams(location.search).has('demo');
+        const POLL_MS = 15000;
 
-        // Store current bids and selected item
-        let currentBids = {};
-        let selectedItem = null;
-        let pendingBidData = null;
-        let auctionIsOpen = true;
-        let bidSubmissions = [];
+        const $ = id => document.getElementById(id);
 
-        // Initialize the page
-        function init() {
-            checkAuctionStatus();
-            renderItems();         // render once
-            fetchCurrentBids();    // load initial bids
-            // Update bids every 15 seconds
-            setInterval(fetchCurrentBids, 15000);
-            // Check auction status every minute
-            setInterval(checkAuctionStatus, 60000);
+        let bids = {};              // item name -> bid, or array of bids for multi-winner items
+        let activeFilter = 'All';
+        let openIndex = null;       // index into ITEMS of the item shown in the sheet
+        let currentStep = 'form';   // 'form' | 'review' | 'done'
+        let stickyNotice = false;   // true while an error message should survive live refreshes
+        let pendingBid = null;
+
+        // ---------- Remembered on this device ----------
+
+        function load(key, fallback) {
+            try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; }
         }
 
-        // Check if auction is still open
-        function checkAuctionStatus() {
-            const now = new Date();
-            auctionIsOpen = now < AUCTION_END_TIME;
-            
-            const statusElement = document.getElementById('auctionStatus');
-            if (!auctionIsOpen) {
-                statusElement.textContent = 'Auction is CLOSED';
-                statusElement.classList.add('closed');
-                // Disable all bid buttons
-                document.querySelectorAll('.btn-bid').forEach(btn => {
-                    btn.disabled = true;
-                    btn.textContent = 'Auction Closed';
-                });
-            } else {
-                const timeLeft = Math.floor((AUCTION_END_TIME - now) / 1000 / 60 / 60);
-                if (timeLeft < 24) {
-                    statusElement.textContent = `Auction closes in ${timeLeft} hours`;
-                }
-            }
+        function save(key, value) {
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* private mode */ }
         }
 
-        // Get minimum bid increment based on current bid
+        let bidder = load('lshBidder', null);              // { fullName, email, phone }
+        let myBids = load('lshMyBids' + AUCTION.year, {}); // item name -> my highest bid
+
+        // ---------- Bidding rules (keep in step with Code.gs) ----------
+
         function getMinimumBidIncrement(currentBid) {
             if (currentBid < 100) return 5;
             if (currentBid < 500) return 10;
@@ -1120,602 +624,618 @@
             return 100;
         }
 
-        // Helper function to safely extract bid amount from bid data
-        function getBidAmount(bidData, defaultValue) {
-            if (!bidData) return defaultValue;
-            if (typeof bidData === 'object' && bidData.bidAmount !== undefined) {
-                return Number(bidData.bidAmount);
-            }
-            if (typeof bidData === 'number') {
-                return bidData;
-            }
-            return defaultValue;
+        function quantityOf(item) { return item.quantity || 1; }
+
+        // Bids currently winning this item, best first.
+        function winnersOf(item) {
+            const data = bids[item.name];
+            if (!data) return [];
+            return (Array.isArray(data) ? data : [data]).slice(0, quantityOf(item));
         }
 
-        // Get phone identifier for display (returns object with text or null)
-        function getPhoneIdentifier(bidData) {
-            console.log('getPhoneIdentifier called with:', bidData);
-            if (!bidData || typeof bidData !== 'object') {
-                console.log('No bidData or not an object');
-                return null;
+        function bidRange(item) {
+            const winners = winnersOf(item);
+            if (winners.length < quantityOf(item)) {
+                return { min: item.startingBid, max: item.startingBid + AUCTION.maxRaise, increment: getMinimumBidIncrement(item.startingBid) };
             }
-            if (!bidData.phone) {
-                console.log('No phone field in bidData');
-                return null;
-            }
-            const phone = String(bidData.phone);
-            console.log('Phone number:', phone);
-            const digitsOnly = phone.replace(/\D/g, '');
-            if (digitsOnly.length >= 4) {
-                const last4 = digitsOnly.slice(-4);
-                const result = { text: `Highest Bidder: ${last4}` };
-                console.log('Returning phone identifier:', result);
-                return result;
-            }
-            console.log('Not enough digits in phone');
-            return null;
+            const toBeat = winners[winners.length - 1].bidAmount;
+            const increment = getMinimumBidIncrement(toBeat);
+            return { min: toBeat + increment, max: toBeat + AUCTION.maxRaise, increment };
         }
 
-        // Extract last 4 digits from phone number
-        function getPhoneLast4(phone) {
-            if (!phone) return null;
-            const digitsOnly = String(phone).replace(/\D/g, '');
-            return digitsOnly.length >= 4 ? digitsOnly.slice(-4) : null;
-        }
-
-        // Get top N bids for multi-quantity items (returns array)
-        function getTopBids(bidData, quantity) {
-            console.log('getTopBids called:', { bidData, quantity, isArray: Array.isArray(bidData) });
-            
-            // If bidData is an array, it's already formatted for multi-quantity
-            if (Array.isArray(bidData)) {
-                const result = bidData.slice(0, quantity).map(bid => ({
-                    amount: Number(bid.bidAmount || bid.amount || 0),
-                    phone: getPhoneLast4(bid.phone),
-                    fullName: bid.fullName
-                }));
-                console.log('Returning array of bids:', result);
-                return result;
+        // What to show as "the price" for an item.
+        function priceInfo(item) {
+            const winners = winnersOf(item);
+            const quantity = quantityOf(item);
+            if (quantity > 1) {
+                if (winners.length < quantity) return { label: 'Starting bid', amount: item.startingBid };
+                return { label: 'Lowest winning bid', amount: winners[winners.length - 1].bidAmount };
             }
-            // If it's a single bid object, wrap it in an array
-            if (bidData && typeof bidData === 'object' && bidData.bidAmount) {
-                const result = [{
-                    amount: Number(bidData.bidAmount),
-                    phone: getPhoneLast4(bidData.phone),
-                    fullName: bidData.fullName
-                }];
-                console.log('Wrapping single bid:', result);
-                return result;
-            }
-            console.log('No valid bid data, returning empty array');
-            return [];
+            if (winners.length === 0) return { label: 'Starting bid', amount: item.startingBid };
+            return { label: 'Current bid', amount: winners[0].bidAmount };
         }
 
-        // Render top bidders dropdown for multi-quantity items
-        function renderTopBidders(item, bids) {
-            const quantity = item.quantity || 1;
-            const hasBids = bids && bids.length > 0;
-            const bidCount = hasBids ? bids.length : 0;
-            
-            console.log(`renderTopBidders for ${item.name}:`, { quantity, bidCount, bids });
-            
-            let bidsHtml = '';
-            if (hasBids) {
-                bidsHtml = bids.map((bid, index) => `
-                    <div class="bidder-row">
-                        <span class="bidder-rank">#${index + 1}</span>
-                        <span class="bidder-amount">$${bid.amount}</span>
-                        <span class="bidder-phone">${bid.phone ? `ends in ${bid.phone}` : 'N/A'}</span>
-                    </div>
-                `).join('');
-            } else {
-                bidsHtml = '<div class="no-bids-message">No bids yet - be the first!</div>';
-            }
-
-            return `
-                <div class="top-bidders-container">
-                    <div class="top-bidders-header" onclick="toggleTopBidders('${item.id}')">
-                        <div class="top-bidders-title">
-                            Top Bidders<span class="quantity-badge">${bidCount} of ${quantity}</span>
-                        </div>
-                        <div class="dropdown-arrow expanded" id="arrow-${item.id}">▼</div>
-                    </div>
-                    <div class="top-bidders-list expanded" id="bidders-${item.id}">
-                        ${bidsHtml}
-                    </div>
-                </div>
-            `;
+        function last4(phone) {
+            const digits = String(phone || '').replace(/\D/g, '');
+            return digits.length >= 4 ? digits.slice(-4) : '';
         }
 
-        // Toggle top bidders dropdown
-        function toggleTopBidders(itemId) {
-            const list = document.getElementById(`bidders-${itemId}`);
-            const arrow = document.getElementById(`arrow-${itemId}`);
-            
-            if (list && arrow) {
-                list.classList.toggle('expanded');
-                arrow.classList.toggle('expanded');
-            }
+        // 'winning', 'outbid', or null if this device hasn't bid on the item.
+        function myStatus(item) {
+            if (!bidder || !myBids[item.name]) return null;
+            const mine = last4(bidder.phone);
+            return winnersOf(item).some(w => w.last4 === mine) ? 'winning' : 'outbid';
         }
 
-        // Generate unique bid ID
-        function generateBidId() {
-            return Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        function isOpen() { return Date.now() < END_TIME.getTime(); }
+
+        // ---------- Small helpers ----------
+
+        function escapeHtml(text) {
+            return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
-        // Check rate limiting (client-side)
-        function checkRateLimit(email) {
-            const now = Date.now();
-            const fiveMinutesAgo = now - (5 * 60 * 1000);
-            
-            // Clean old submissions
-            bidSubmissions = bidSubmissions.filter(sub => sub.time > fiveMinutesAgo);
-            
-            // Count submissions from this email
-            const recentSubmissions = bidSubmissions.filter(sub => sub.email === email);
-            
-            if (recentSubmissions.length >= 5) {
-                return false; // Rate limit exceeded
-            }
-            
-            // Add this submission
-            bidSubmissions.push({ email, time: now });
-            return true;
-        }
-
-        // Render all items (run once)
-        function renderItems() {
-            const grid = document.getElementById('itemsGrid');
-            grid.innerHTML = items.map(item => {
-                const bidData = currentBids[item.name];
-                const quantity = item.quantity || 1;
-                const isMultiQuantity = quantity > 1;
-                
-                let currentBid, phoneHtml;
-                
-                if (isMultiQuantity) {
-                    // For multi-quantity items, show top N bids
-                    const topBids = getTopBids(bidData, quantity);
-                    // Current bid is the lowest winning bid (or starting bid if no bids)
-                    currentBid = topBids.length > 0 ? topBids[topBids.length - 1].amount : item.startingBid;
-                    phoneHtml = renderTopBidders(item, topBids);
-                } else {
-                    // For single-quantity items, use existing logic
-                    currentBid = getBidAmount(bidData, item.startingBid);
-                    const phoneData = getPhoneIdentifier(bidData);
-                    phoneHtml = phoneData ? `<div class="bidder-identifier">${phoneData.text}</div>` : '';
-                }
-                
-                const increment = getMinimumBidIncrement(currentBid);
-                const minNextBid = currentBid + increment;
-                
-                console.log(`Rendering ${item.name}: quantity=${quantity}, isMulti=${isMultiQuantity}`);
-                
-                return `
-                <div class="item-card ${!auctionIsOpen ? 'disabled' : ''}">
-                    <img src="${item.imageUrl}" alt="${item.name}" class="item-image">
-                    <div class="item-content">
-                        <div class="item-title">${item.name}</div>
-                        ${isMultiQuantity ? `<div class="quantity-indicator">Quantity: ${quantity} available</div>` : ''}
-                        <div class="item-price">
-                            <span class="price-label">${isMultiQuantity ? 'Lowest Winning Bid:' : 'Current Bid:'} </span>
-                            <span id="price-${item.id}">$${currentBid}</span>
-                        </div>
-                        <div class="bid-increment" id="minbid-${item.id}">Next minimum bid: $${minNextBid}</div>
-                        <div class="item-buttons">
-                            <button class="btn btn-details" onclick="showDetails('${item.id}')">Details</button>
-                            <button class="btn btn-bid" onclick="showBidForm('${item.id}')" 
-                                ${!auctionIsOpen ? 'disabled' : ''}>
-                                ${auctionIsOpen ? 'Bid Now' : 'Auction Closed'}
-                            </button>
-                        </div>
-                        <div id="phone-${item.id}">${phoneHtml}</div>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        // Update only the bids that changed (no full re-render)
-        function updateBids(data) {
-            // If the grid is empty for some reason, re-render
-            if (!document.getElementById('itemsGrid').children.length) {
-                renderItems();
-            }
-
-            items.forEach(item => {
-                const bidData = data[item.name];
-                const quantity = item.quantity || 1;
-                const isMultiQuantity = quantity > 1;
-                
-                let newBid;
-                if (isMultiQuantity) {
-                    const topBids = getTopBids(bidData, quantity);
-                    newBid = topBids.length > 0 ? topBids[topBids.length - 1].amount : item.startingBid;
-                } else {
-                    newBid = getBidAmount(bidData, item.startingBid);
-                }
-                
-                const priceEl = document.getElementById(`price-${item.id}`);
-                const minEl = document.getElementById(`minbid-${item.id}`);
-                const phoneEl = document.getElementById(`phone-${item.id}`);
-
-                // Update price text only when changed
-                if (priceEl) {
-                    const oldText = priceEl.textContent;
-                    const newText = `$${newBid}`;
-                    if (oldText !== newText) {
-                        priceEl.textContent = newText;
-                        // small visual highlight for change
-                        priceEl.classList.add('price-updated');
-                        setTimeout(() => priceEl.classList.remove('price-updated'), 700);
-                    }
-                }
-
-                // Update minimum next bid text if it exists and changed
-                if (minEl) {
-                    const increment = getMinimumBidIncrement(newBid);
-                    const minNext = newBid + increment;
-                    const minText = `Next minimum bid: $${minNext}`;
-                    if (minEl.textContent !== minText) {
-                        minEl.textContent = minText;
-                    }
-                }
-
-                // Update phone display area
-                if (phoneEl) {
-                    if (isMultiQuantity) {
-                        // Handle multi-quantity items with top bidders dropdown
-                        const topBids = getTopBids(bidData, quantity);
-                        const hasTopBidders = phoneEl.querySelector('.top-bidders-container') !== null;
-                        
-                        if (topBids.length > 0 || bidData) {
-                            const newHtml = renderTopBidders(item, topBids);
-                            // Only update if content changed
-                            if (!hasTopBidders || phoneEl.innerHTML !== newHtml) {
-                                phoneEl.innerHTML = newHtml;
-                                console.log(`🔄 Updated top bidders for ${item.name}`);
-                            }
-                        }
-                    } else {
-                        // Handle single-quantity items with phone identifier
-                        const phoneData = getPhoneIdentifier(bidData);
-                        const currentHasPhone = phoneEl.querySelector('.bidder-identifier') !== null;
-                        
-                        console.log(`📱 Checking ${item.name}: bidData=`, bidData, 'phoneData=', phoneData, 'currentHasPhone=', currentHasPhone);
-                        
-                        if (phoneData && !currentHasPhone) {
-                            // Add phone identifier
-                            const div = document.createElement('div');
-                            div.className = 'bidder-identifier';
-                            div.textContent = phoneData.text;
-                            phoneEl.innerHTML = ''; // Clear safely
-                            phoneEl.appendChild(div);
-                            console.log(`✅ Added phone identifier for ${item.name}`);
-                        } else if (phoneData && currentHasPhone) {
-                            // Update existing phone identifier using textContent
-                            const existingDiv = phoneEl.querySelector('.bidder-identifier');
-                            if (existingDiv && existingDiv.textContent !== phoneData.text) {
-                                existingDiv.textContent = phoneData.text;
-                                console.log(`🔄 Updated phone identifier for ${item.name}`);
-                            }
-                        } else if (!phoneData && currentHasPhone && bidData) {
-                            // ONLY remove if we have bidData but no phone (meaning server said no phone)
-                            // Don't remove if bidData is undefined (server hasn't responded yet)
-                            phoneEl.innerHTML = ''; // Clear safely
-                            console.log(`❌ Removed phone identifier for ${item.name} (server has bid but no phone)`);
-                        }
-                        // If !phoneData && !bidData, do nothing (keep whatever is there from initial render)
-                    }
-                }
+        // Escapes the text, then turns web and email addresses into links.
+        function linkify(text) {
+            return escapeHtml(text).replace(/((?:https?:\/\/|www\.)[^\s<]+[^\s<.,;:!?)])|([\w.+-]+@[\w-]+\.[\w.-]*\w)/g, (match, url, email) => {
+                if (email) return `<a href="mailto:${email}">${email}</a>`;
+                const href = url.startsWith('http') ? url : 'https://' + url;
+                return `<a href="${href}" target="_blank" rel="noopener">${url}</a>`;
             });
         }
 
-        // Fetch current bids from Google Apps Script
-        async function fetchCurrentBids() {
-            if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
-                document.getElementById('loadingIndicator').style.display = 'none';
-                return;
-            }
+        const money = amount => '$' + Number(amount).toLocaleString('en-US');
 
-            try {
-                const response = await fetch(APPS_SCRIPT_URL + '?action=getBids');
-                const data = await response.json();
-                
-                // Debug logging
-                console.log('📊 Bid data received:', data);
-                console.log('📊 Number of items with bids:', Object.keys(data).length);
-                
-                // Keep a reference to prior bids if you want to compare or animate
-                currentBids = data || {};
-                // Update only what changed (no DOM wholesale replacement)
-                updateBids(currentBids);
-                document.getElementById('loadingIndicator').style.display = 'none';
-            } catch (error) {
-                console.error('Error fetching bids:', error);
-                document.getElementById('loadingIndicator').textContent = 'Using starting bids';
-                setTimeout(() => {
-                    document.getElementById('loadingIndicator').style.display = 'none';
-                }, 2000);
-            }
+        // ---------- Page chrome ----------
+
+        function renderChrome() {
+            const title = `${AUCTION.title} ${AUCTION.year}`;
+            document.title = title;
+            $('siteTitle').textContent = title;
+            $('headline').textContent = title;
+            $('tagline').textContent = AUCTION.tagline;
+            $('closesAt').textContent = END_TIME.toLocaleString('en-US', {
+                weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                timeZone: 'America/New_York'
+            }) + ' Eastern';
+            document.querySelectorAll('.org-name').forEach(el => el.textContent = AUCTION.orgName);
+            $('contactName').textContent = AUCTION.contactName;
+            $('contactLink').textContent = AUCTION.contactEmail;
+            $('contactLink').href = 'mailto:' + AUCTION.contactEmail;
+            $('demoBanner').hidden = !DEMO;
         }
 
-        // Show item details modal
-        function showDetails(itemId) {
-            const item = items.find(i => i.id === itemId);
-            if (!item) return;
+        let wasOpen = true;
 
-            document.getElementById('modalTitle').textContent = item.name;
-            document.getElementById('modalDescription').textContent = item.description;
-            const bidData = currentBids[item.name];
-            const currentBid = getBidAmount(bidData, item.startingBid);
-            document.getElementById('modalPrice').textContent = `$${currentBid}`;
-            document.getElementById('detailsModal').style.display = 'block';
-        }
+        function renderCountdown() {
+            const el = $('countdown');
+            const left = END_TIME.getTime() - Date.now();
 
-        // Close details modal
-        function closeDetailsModal() {
-            document.getElementById('detailsModal').style.display = 'none';
-        }
-
-        // Show bid form modal
-        function showBidForm(itemId) {
-            if (!auctionIsOpen) {
-                alert('Sorry, the auction has ended. No more bids can be placed.');
-                return;
-            }
-
-            const item = items.find(i => i.id === itemId);
-            if (!item) return;
-
-            selectedItem = item;
-            const bidData = currentBids[item.name];
-            const currentBid = getBidAmount(bidData, item.startingBid);
-            const increment = getMinimumBidIncrement(currentBid);
-            const minBid = currentBid + increment;
-
-            document.getElementById('bidItemName').textContent = `You are bidding on: ${item.name}`;
-            document.getElementById('bidCurrentPrice').textContent = `$${currentBid}`;
-            
-            // Set minimum bid amount with increment
-            const bidAmountField = document.getElementById('bidAmount');
-            bidAmountField.min = minBid;
-            bidAmountField.placeholder = `Minimum: $${minBid} (increment of $${increment})`;
-            
-            // Reset form
-            document.getElementById('bidForm').reset();
-            document.getElementById('successMessage').style.display = 'none';
-            document.getElementById('errorBanner').style.display = 'none';
-            document.getElementById('rateLimitWarning').style.display = 'none';
-            clearErrors();
-            
-            document.getElementById('bidModal').style.display = 'block';
-        }
-
-        // Close bid modal
-        function closeBidModal() {
-            document.getElementById('bidModal').style.display = 'none';
-            selectedItem = null;
-        }
-
-        // Clear form errors
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
-        }
-
-        // Validate email
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email) && email.length <= 100 && !email.includes('<') && !email.includes('>');
-        }
-
-        // Validate phone number (at least 10 digits)
-        function isValidPhone(phone) {
-            const digitsOnly = phone.replace(/\D/g, '');
-            return digitsOnly.length >= 10 && digitsOnly.length <= 15;
-        }
-
-        // Validate name (2-50 chars, letters, spaces, hyphens, apostrophes)
-        function isValidName(name) {
-            const re = /^[a-zA-Z\s\-']+$/;
-            return name.length >= 2 && name.length <= 50 && re.test(name);
-        }
-
-        // Sanitize input to prevent injection
-        function sanitizeInput(input) {
-            if (typeof input === 'string') {
-                // Remove any characters that could start a formula in sheets
-                return input.replace(/^[=+\-@]/g, '').trim();
-            }
-            return input;
-        }
-
-        // Handle form submission - show confirmation
-        document.getElementById('bidForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearErrors();
-
-            // Check honeypot field (bot protection)
-            const honeypot = document.querySelector('input[name="website"]').value;
-            if (honeypot) {
-                // Bot detected - fake success
-                document.getElementById('successMessage').style.display = 'block';
-                setTimeout(closeBidModal, 3000);
-                return;
-            }
-
-            const fullName = sanitizeInput(document.getElementById('fullName').value.trim());
-            const email = sanitizeInput(document.getElementById('email').value.trim().toLowerCase());
-            const phone = sanitizeInput(document.getElementById('phone').value.trim());
-            const bidAmount = parseInt(document.getElementById('bidAmount').value);
-
-            let hasError = false;
-
-            // Validate name
-            if (!fullName || !isValidName(fullName)) {
-                document.getElementById('nameError').textContent = 'Please enter a valid name (2-50 characters, letters only)';
-                document.getElementById('nameError').style.display = 'block';
-                document.getElementById('fullName').classList.add('error');
-                hasError = true;
-            }
-
-            // Validate email
-            if (!email || !isValidEmail(email)) {
-                document.getElementById('emailError').textContent = 'Please enter a valid email address';
-                document.getElementById('emailError').style.display = 'block';
-                document.getElementById('email').classList.add('error');
-                hasError = true;
-            }
-
-            // Validate phone
-            if (!phone || !isValidPhone(phone)) {
-                document.getElementById('phoneError').textContent = 'Please enter a valid phone number (10-15 digits)';
-                document.getElementById('phoneError').style.display = 'block';
-                document.getElementById('phone').classList.add('error');
-                hasError = true;
-            }
-
-            // Validate bid amount with increment and maximum bid difference
-            const bidData = currentBids[selectedItem.name];
-            const currentBid = getBidAmount(bidData, selectedItem.startingBid);
-            const increment = getMinimumBidIncrement(currentBid);
-            const minBid = currentBid + increment;
-            const maxBid = currentBid + 100; // Maximum $100 above current bid
-
-            if (!bidAmount || bidAmount < minBid || bidAmount > 1000000 || bidAmount > maxBid) {
-                document.getElementById('bidError').style.display = 'block';
-                if (bidAmount > 1000000) {
-                    document.getElementById('bidError').textContent = 'Bid amount too high (max $1,000,000)';
-                } else if (bidAmount > maxBid) {
-                    document.getElementById('bidError').textContent = `Maximum bid cannot exceed $${maxBid} (current bid + $100)`;
-                } else {
-                    document.getElementById('bidError').textContent = `Minimum bid is $${minBid} (increment of $${increment})`;
+            if (left <= 0) {
+                el.className = 'countdown closed';
+                el.innerHTML = 'Bidding<strong>Closed</strong>';
+                if (wasOpen) {
+                    wasOpen = false;
+                    renderSheet();
                 }
-                document.getElementById('bidAmount').classList.add('error');
-                hasError = true;
-            }
-
-            if (hasError) return;
-
-            // Check rate limiting
-            if (!checkRateLimit(email)) {
-                document.getElementById('rateLimitWarning').style.display = 'block';
                 return;
             }
 
-            // Store bid data and show confirmation
-            pendingBidData = {
-                bidId: generateBidId(),
-                fullName: fullName,
-                email: email,
-                phone: phone,
-                bidAmount: bidAmount,
-                itemName: selectedItem.name
-            };
+            const s = Math.floor(left / 1000);
+            const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+            let text;
+            if (d > 0) text = `${d}d ${h}h`;
+            else if (h > 0) text = `${h}h ${m}m`;
+            else text = `${m}m ${String(s % 60).padStart(2, '0')}s`;
 
-            showConfirmation();
+            el.className = 'countdown' + (d === 0 ? ' soon' : '');
+            el.innerHTML = `Closes in<strong>${text}</strong>`;
+        }
+
+        // ---------- Filters ----------
+
+        function filterList() {
+            const categories = [...new Set(ITEMS.map(item => item.category).filter(Boolean))];
+            const list = ['All', ...categories, 'No bids yet'];
+            if (Object.keys(myBids).length) list.splice(1, 0, 'My bids');
+            return list;
+        }
+
+        function renderChips() {
+            const list = filterList();
+            if (!list.includes(activeFilter)) activeFilter = 'All';
+            $('chips').innerHTML = list.map(name =>
+                `<button class="chip" type="button" aria-pressed="${name === activeFilter}" data-filter="${escapeHtml(name)}">${escapeHtml(name)}</button>`
+            ).join('');
+        }
+
+        function matchesFilter(item) {
+            const query = $('search').value.trim().toLowerCase();
+            if (query && !(item.name + ' ' + item.description).toLowerCase().includes(query)) return false;
+            if (activeFilter === 'All') return true;
+            if (activeFilter === 'My bids') return Boolean(myBids[item.name]);
+            if (activeFilter === 'No bids yet') return winnersOf(item).length === 0;
+            return item.category === activeFilter;
+        }
+
+        function applyFilters() {
+            let shown = 0;
+            ITEMS.forEach((item, index) => {
+                const visible = matchesFilter(item);
+                $('card-' + index).hidden = !visible;
+                if (visible) shown++;
+            });
+            $('emptyState').hidden = shown > 0;
+            $('resultCount').textContent = shown === ITEMS.length ? `${ITEMS.length} items` : `${shown} of ${ITEMS.length} items`;
+        }
+
+        // ---------- Cards ----------
+
+        function renderGrid() {
+            $('grid').innerHTML = ITEMS.map((item, index) => `
+                <button class="card" type="button" id="card-${index}" data-index="${index}">
+                    <div class="card-photo">
+                        <img src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async" onerror="this.hidden = true">
+                        <span class="badge" id="badge-${index}" hidden></span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${escapeHtml(item.name)}</div>
+                        ${quantityOf(item) > 1 ? `<div class="card-qty">${quantityOf(item)} available</div>` : ''}
+                        <div class="card-price">
+                            <span class="price-label" id="label-${index}"></span>
+                            <span class="price" id="price-${index}"></span>
+                        </div>
+                        <div class="card-bidder" id="bidder-${index}"></div>
+                    </div>
+                </button>
+            `).join('') + '<p class="empty" id="emptyState" hidden>No items match. Try a different search or filter.</p>';
+            ITEMS.forEach((item, index) => updateCard(index));
+        }
+
+        function updateCard(index) {
+            const item = ITEMS[index];
+            const info = priceInfo(item);
+            const winners = winnersOf(item);
+            const priceEl = $('price-' + index);
+            const newPrice = money(info.amount);
+
+            if (priceEl.textContent && priceEl.textContent !== newPrice) {
+                priceEl.classList.remove('bump');
+                void priceEl.offsetWidth;   // restart the animation
+                priceEl.classList.add('bump');
+            }
+            priceEl.textContent = newPrice;
+            $('label-' + index).textContent = info.label;
+
+            let bidderText = 'No bids yet';
+            if (quantityOf(item) > 1) {
+                if (winners.length) bidderText = `${winners.length} of ${quantityOf(item)} claimed`;
+            } else if (winners.length) {
+                bidderText = `High bidder ••${winners[0].last4}`;
+            }
+            $('bidder-' + index).textContent = bidderText;
+
+            const status = myStatus(item);
+            const badge = $('badge-' + index);
+            badge.hidden = !status;
+            badge.className = 'badge' + (status === 'outbid' ? ' outbid' : '');
+            badge.textContent = status === 'winning' ? "You're winning" : 'Outbid';
+        }
+
+        // ---------- Item sheet ----------
+
+        function showStep(name) {
+            currentStep = name;
+            const open = isOpen();
+            $('stepForm').hidden = !open || name !== 'form';
+            $('stepReview').hidden = !open || name !== 'review';
+            $('stepDone').hidden = name !== 'done';
+            $('closedNotice').hidden = open || name === 'done';
+        }
+
+        function setNotice(kind, text) {
+            const el = $('sheetNotice');
+            el.hidden = !text;
+            el.className = 'notice ' + (kind || '');
+            el.textContent = text || '';
+        }
+
+        function openSheet(index) {
+            openIndex = index;
+            pendingBid = null;
+            stickyNotice = false;
+            currentStep = 'form';
+            const item = ITEMS[index];
+
+            $('sheetImg').hidden = false;
+            $('sheetImg').src = item.image;
+            $('sheetImg').alt = item.name;
+            $('sheetCategory').textContent = item.category || '';
+            $('sheetTitle').textContent = item.name;
+            $('sheetDesc').innerHTML = linkify(item.description);
+
+            $('bidAmount').value = '';
+            clearFieldErrors();
+            fillBidderFields();
+            renderSheet();
+
+            $('sheet').showModal();
+            document.querySelector('.sheet-scroll').scrollTop = 0;
+
+            // Fold long descriptions so the bid form stays close to the top.
+            const desc = $('sheetDesc');
+            desc.classList.remove('folded');
+            const long = desc.scrollHeight > 190;
+            desc.classList.toggle('folded', long);
+            $('descMore').hidden = !long;
+        }
+
+        // Refreshes the live parts of the sheet (price, winners, quick bids).
+        function renderSheet() {
+            if (openIndex === null) return;
+            const item = ITEMS[openIndex];
+            const info = priceInfo(item);
+            const winners = winnersOf(item);
+            const quantity = quantityOf(item);
+            const range = bidRange(item);
+            const mine = bidder && myBids[item.name] ? last4(bidder.phone) : null;
+
+            $('sheetPriceLabel').textContent = info.label;
+            $('sheetPrice').textContent = money(info.amount);
+
+            if (quantity > 1) {
+                $('sheetSide').innerHTML = `${quantity} available<br>Top ${quantity} bidders each win one`;
+            } else if (winners.length) {
+                $('sheetSide').innerHTML = `High bidder<br><strong>••${escapeHtml(winners[0].last4)}</strong>`;
+            } else {
+                $('sheetSide').textContent = 'No bids yet — be the first!';
+            }
+
+            const winnersEl = $('sheetWinners');
+            winnersEl.hidden = !(quantity > 1 && winners.length);
+            if (!winnersEl.hidden) {
+                winnersEl.innerHTML = `<h3>Currently winning (${winners.length} of ${quantity})</h3><ul>` + winners.map(w => {
+                    const me = w.last4 === mine;
+                    return `<li class="${me ? 'me' : ''}"><span>••${escapeHtml(w.last4)}${me ? ' (you)' : ''}</span><span>${money(w.bidAmount)}</span></li>`;
+                }).join('') + '</ul>';
+            }
+
+            // Status note for this bidder, unless an error message is showing.
+            if (!stickyNotice) {
+                const status = currentStep === 'done' ? null : myStatus(item);
+                if (status === 'winning') setNotice('good', `You're currently winning this item with a bid of ${money(myBids[item.name])}.`);
+                else if (status === 'outbid' && isOpen()) setNotice('bad', `You've been outbid. Bid ${money(range.min)} or more to get back in.`);
+                else if (status === 'outbid') setNotice('bad', 'You were outbid on this item.');
+                else setNotice();
+            }
+
+            // Quick-bid buttons: the minimum and two steps above it.
+            const amounts = [range.min, range.min + range.increment, range.min + 2 * range.increment].filter(a => a <= range.max);
+            const current = parseInt($('bidAmount').value, 10);
+            $('quick').innerHTML = amounts.map(a =>
+                `<button type="button" data-amount="${a}" aria-pressed="${a === current}">${money(a)}</button>`
+            ).join('');
+            $('amountHint').textContent = `Minimum ${money(range.min)} · maximum ${money(range.max)} for now`;
+
+            showStep(currentStep);
+        }
+
+        function closeSheet() {
+            $('sheet').close();
+        }
+
+        function fillBidderFields() {
+            const known = Boolean(bidder);
+            $('biddingAs').hidden = !known;
+            $('infoFields').hidden = known;
+            if (known) {
+                $('biddingAsText').textContent = `Bidding as ${bidder.fullName} · ••${last4(bidder.phone)}`;
+                $('fullName').value = bidder.fullName;
+                $('email').value = bidder.email;
+                $('phone').value = bidder.phone;
+            }
+        }
+
+        // ---------- Validation ----------
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.field.invalid').forEach(el => el.classList.remove('invalid'));
+        }
+
+        function markInvalid(fieldId, message) {
+            const field = $(fieldId);
+            field.classList.add('invalid');
+            if (message) field.querySelector('.field-error').textContent = message;
+        }
+
+        // Letters from any alphabet, plus spaces, periods, hyphens and apostrophes.
+        const isValidName = name => name.length >= 2 && name.length <= 50 && /^[\p{L}\p{M}\s.'’\-]+$/u.test(name);
+        const isValidEmail = email => email.length <= 100 && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email);
+        const isValidPhone = phone => { const d = phone.replace(/\D/g, ''); return d.length >= 10 && d.length <= 15; };
+
+        function validateForm() {
+            clearFieldErrors();
+            const item = ITEMS[openIndex];
+            const range = bidRange(item);
+            const amountText = $('bidAmount').value.trim().replace(/^\$/, '').replace(/,/g, '');
+            const amount = /^\d+$/.test(amountText) ? parseInt(amountText, 10) : NaN;
+            const fullName = $('fullName').value.trim().replace(/\s+/g, ' ');
+            const email = $('email').value.trim().toLowerCase();
+            const phone = $('phone').value.trim();
+            let firstInvalid = null;
+
+            if (isNaN(amount)) markInvalid('fieldAmount', 'Enter a whole dollar amount.');
+            else if (amount < range.min) markInvalid('fieldAmount', `The minimum bid is ${money(range.min)}.`);
+            else if (amount > range.max) markInvalid('fieldAmount', `The most you can bid right now is ${money(range.max)} (${money(AUCTION.maxRaise)} over the current bid).`);
+            if ($('fieldAmount').classList.contains('invalid')) firstInvalid = 'bidAmount';
+
+            const infoInvalid = [
+                [!isValidName(fullName), 'fieldName', 'fullName'],
+                [!isValidEmail(email), 'fieldEmail', 'email'],
+                [!isValidPhone(phone), 'fieldPhone', 'phone'],
+            ].filter(([bad]) => bad);
+
+            infoInvalid.forEach(([, fieldId, inputId]) => { markInvalid(fieldId); firstInvalid = firstInvalid || inputId; });
+
+            if (infoInvalid.length) {       // make sure the fields are visible
+                $('biddingAs').hidden = true;
+                $('infoFields').hidden = false;
+            }
+
+            if (firstInvalid) {
+                $(firstInvalid).focus();
+                return null;
+            }
+            return { fullName, email, phone, bidAmount: amount, itemName: item.name };
+        }
+
+        // ---------- Submitting ----------
+
+        function generateBidId() {
+            return Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+        }
+
+        function goToReview(event) {
+            event.preventDefault();
+
+            if ($('website').value) {        // honeypot: pretend it worked
+                showDone({ bidAmount: 0, email: '' });
+                return;
+            }
+
+            const data = validateForm();
+            if (!data) return;
+
+            pendingBid = { ...data, bidId: generateBidId() };
+            $('reviewItem').textContent = data.itemName;
+            $('reviewAmount').textContent = money(data.bidAmount);
+            $('reviewName').textContent = data.fullName;
+            $('reviewEmail').textContent = data.email;
+            stickyNotice = false;
+            showStep('review');
+            $('confirmBtn').focus();
+        }
+
+        function backToForm(kind, message) {
+            currentStep = 'form';
+            stickyNotice = Boolean(message);
+            if (message) setNotice(kind, message);
+            renderSheet();
+            if (message) $('sheetNotice').scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+
+        async function confirmBid() {
+            if (!pendingBid) return;
+            const bid = pendingBid;
+            const item = ITEMS[openIndex];
+            const button = $('confirmBtn');
+            button.disabled = true;
+            button.textContent = 'Submitting…';
+
+            let result;
+            try {
+                result = await sendBid(bid);
+            } catch (error) {
+                // The request may still have gone through; see whether our bid shows up.
+                await fetchBids();
+                const landed = winnersOf(item).some(w => w.bidAmount === bid.bidAmount && w.last4 === last4(bid.phone));
+                result = landed ? { success: true } : { success: false, code: 'NETWORK' };
+            }
+
+            button.disabled = false;
+            button.textContent = 'Confirm bid';
+            if (openIndex === null || ITEMS[openIndex] !== item) return;   // sheet was closed meanwhile
+
+            if (result.success || result.code === 'DUPLICATE') {
+                bidder = { fullName: bid.fullName, email: bid.email, phone: bid.phone };
+                myBids[bid.itemName] = Math.max(myBids[bid.itemName] || 0, bid.bidAmount);
+                save('lshBidder', bidder);
+                save('lshMyBids' + AUCTION.year, myBids);
+                pendingBid = null;
+                await fetchBids();
+                renderChips();
+                showDone(bid);
+                return;
+            }
+
+            await fetchBids();
+            if (result.code === 'TOO_LOW') {
+                $('bidAmount').value = '';
+                backToForm('bad', `Someone bid just before you. The minimum is now ${money(bidRange(item).min)} — want to go again?`);
+            } else if (result.code === 'NETWORK') {
+                backToForm('bad', "We couldn't reach the auction server, so your bid was NOT placed. Check your connection and try again.");
+            } else if (result.code === 'CLOSED') {
+                backToForm('warn', 'Sorry — bidding has closed.');
+            } else {
+                backToForm('bad', result.error || 'Something went wrong and your bid was not placed. Please try again.');
+            }
+        }
+
+        function showDone(bid) {
+            const item = ITEMS[openIndex];
+            const winning = myStatus(item) === 'winning';
+            $('doneTitle').textContent = winning
+                ? (quantityOf(item) > 1 ? "You're in a winning spot!" : "You're the high bidder!")
+                : 'Bid received';
+            $('doneText').textContent = `Your ${money(bid.bidAmount)} bid on ${item.name} is in. A confirmation is on its way to ${bid.email}. Check back before closing to make sure you're still winning.`;
+            stickyNotice = false;
+            currentStep = 'done';
+            renderSheet();
+            $('doneBtn').focus();
+        }
+
+        // ---------- Backend ----------
+
+        async function sendBid(bid) {
+            if (DEMO) return demoBackend.submit(bid);
+            const response = await fetch(AUCTION.scriptUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'submitBid',
+                    bidId: bid.bidId,
+                    fullName: bid.fullName,
+                    email: bid.email,
+                    phone: bid.phone,
+                    bidAmount: String(bid.bidAmount),
+                    itemName: bid.itemName,
+                    userAgent: navigator.userAgent,
+                }),
+            });
+            return response.json();
+        }
+
+        async function fetchBids() {
+            try {
+                let data;
+                if (DEMO) {
+                    data = demoBackend.getBids();
+                } else {
+                    const response = await fetch(AUCTION.scriptUrl + '?action=getBids');
+                    data = await response.json();
+                }
+                if (!data || data.error) return;
+                bids = data;
+                ITEMS.forEach((item, index) => updateCard(index));
+                if (activeFilter === 'No bids yet' || activeFilter === 'My bids') applyFilters();
+                if ($('sheet').open) renderSheet();
+            } catch (error) {
+                console.error('Could not load bids:', error);
+            }
+        }
+
+        // Stand-in for the Apps Script backend when no scriptUrl is set (or ?demo is in the URL).
+        const demoBackend = {
+            rows: [
+                { itemName: ITEMS[0]?.name, bidAmount: ITEMS[0]?.startingBid + 10, phone: '8285550142', email: 'a@example.com' },
+                { itemName: ITEMS[2]?.name, bidAmount: ITEMS[2]?.startingBid, phone: '8285559731', email: 'b@example.com' },
+                ...ITEMS.filter(item => quantityOf(item) > 1).slice(0, 2).flatMap(item => [
+                    { itemName: item.name, bidAmount: item.startingBid + 5, phone: '8285550142', email: 'a@example.com' },
+                    { itemName: item.name, bidAmount: item.startingBid, phone: '8285553308', email: 'c@example.com' },
+                ]),
+            ].filter(row => row.itemName),
+
+            winners(item) {
+                const seen = new Set();
+                return this.rows
+                    .filter(row => row.itemName === item.name)
+                    .sort((a, b) => b.bidAmount - a.bidAmount)
+                    .filter(row => !seen.has(row.email) && seen.add(row.email))
+                    .slice(0, quantityOf(item));
+            },
+
+            getBids() {
+                const out = {};
+                ITEMS.forEach(item => {
+                    const winners = this.winners(item).map(row => ({ bidAmount: row.bidAmount, last4: last4(row.phone) }));
+                    if (winners.length) out[item.name] = quantityOf(item) > 1 ? winners : winners[0];
+                });
+                return out;
+            },
+
+            async submit(bid) {
+                await new Promise(resolve => setTimeout(resolve, 600));
+                if (!isOpen()) return { success: false, code: 'CLOSED' };
+                const item = ITEMS.find(i => i.name === bid.itemName);
+                const shown = bids;
+                bids = this.getBids();          // judge against the "server's" latest, not what the page last saw
+                const range = bidRange(item);
+                bids = shown;
+                if (bid.bidAmount < range.min) return { success: false, code: 'TOO_LOW', minBid: range.min };
+                if (bid.bidAmount > range.max) return { success: false, code: 'TOO_HIGH', error: `The most you can bid right now is ${money(range.max)}.` };
+                this.rows.push({ ...bid });
+                return { success: true };
+            },
+        };
+
+        // ---------- Wiring ----------
+
+        $('grid').addEventListener('click', event => {
+            const card = event.target.closest('.card');
+            if (card) openSheet(Number(card.dataset.index));
         });
 
-        // Show confirmation modal
-        function showConfirmation() {
-            document.getElementById('confirmItemName').textContent = pendingBidData.itemName;
-            document.getElementById('confirmEmail').textContent = pendingBidData.email;
-            document.getElementById('confirmBidAmount').textContent = `$${pendingBidData.bidAmount}`;
-            document.getElementById('confirmModal').style.display = 'block';
-        }
+        $('chips').addEventListener('click', event => {
+            const chip = event.target.closest('.chip');
+            if (!chip) return;
+            activeFilter = chip.dataset.filter;
+            renderChips();
+            applyFilters();
+        });
 
-        // Edit bid - go back to form
-        function editBid() {
-            document.getElementById('confirmModal').style.display = 'none';
-            // Form data is still there, user can edit
-        }
+        $('search').addEventListener('input', applyFilters);
 
-        // Close confirmation modal
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-            pendingBidData = null;
-        }
+        $('quick').addEventListener('click', event => {
+            const button = event.target.closest('button');
+            if (!button) return;
+            $('bidAmount').value = button.dataset.amount;
+            $('fieldAmount').classList.remove('invalid');
+            renderSheet();
+        });
 
-       async function confirmAndSubmitBid() {
-    const confirmBtn = document.getElementById('confirmBtn');
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Submitting...';
+        $('bidAmount').addEventListener('input', () => {
+            const current = parseInt($('bidAmount').value, 10);
+            $('quick').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', Number(b.dataset.amount) === current));
+        });
 
-    // Create a form and submit it (works better with Google Apps Script)
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = APPS_SCRIPT_URL;
-    form.target = 'hidden_iframe';
-    
-    // Add all the fields
-    const fields = {
-        action: 'submitBid',
-        bidId: pendingBidData.bidId,
-        fullName: pendingBidData.fullName,
-        email: pendingBidData.email,
-        phone: pendingBidData.phone,
-        bidAmount: pendingBidData.bidAmount.toString(),
-        itemName: pendingBidData.itemName,
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString()
-    };
-    
-    for (const [key, value] of Object.entries(fields)) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-    }
-    
-    // Create hidden iframe if it doesn't exist
-    let iframe = document.getElementById('hidden_iframe');
-    if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.name = 'hidden_iframe';
-        iframe.id = 'hidden_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-    }
-    
-    // Submit the form
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    
-    // Handle success (we assume it worked since we can't read the response)
-    setTimeout(() => {
-        document.getElementById('confirmModal').style.display = 'none';
-        document.getElementById('successMessage').style.display = 'block';
-        document.getElementById('bidForm').style.display = 'none';
-        
-        // Refresh bids
-        fetchCurrentBids();
-        
-        setTimeout(() => {
-            closeBidModal();
-            document.getElementById('bidForm').style.display = 'block';
-            document.getElementById('successMessage').style.display = 'none';
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Confirm Bid';
-        }, 3000);
-    }, 1000);
-    
-    pendingBidData = null;
-}
+        $('changeInfo').addEventListener('click', () => {
+            $('biddingAs').hidden = true;
+            $('infoFields').hidden = false;
+            $('fullName').focus();
+        });
 
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                if (event.target.id === 'confirmModal') {
-                    pendingBidData = null;
-                }
-            }
-        }
+        $('descMore').addEventListener('click', () => {
+            $('sheetDesc').classList.remove('folded');
+            $('descMore').hidden = true;
+        });
 
-        // Initialize when page loads
-        window.onload = init;
+        $('stepForm').addEventListener('submit', goToReview);
+        $('confirmBtn').addEventListener('click', confirmBid);
+        $('backBtn').addEventListener('click', () => backToForm());
+        $('doneBtn').addEventListener('click', closeSheet);
+        $('sheetClose').addEventListener('click', closeSheet);
+
+        $('sheet').addEventListener('click', event => {
+            if (event.target === $('sheet')) closeSheet();   // click on the backdrop
+        });
+
+        $('sheet').addEventListener('close', () => {
+            openIndex = null;
+            pendingBid = null;
+        });
+
+        $('sheetImg').addEventListener('error', () => { $('sheetImg').hidden = true; });
+
+        // Poll for new bids, but not while the tab is in the background.
+        setInterval(() => { if (!document.hidden) fetchBids(); }, POLL_MS);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) fetchBids(); });
+
+        renderChrome();
+        renderChips();
+        renderGrid();
+        applyFilters();
+        renderCountdown();
+        setInterval(renderCountdown, 1000);
+        fetchBids();
     </script>
 </body>
 </html>
