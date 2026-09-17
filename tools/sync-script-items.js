@@ -40,6 +40,7 @@ let script = fs.readFileSync(scriptPath, 'utf8');
 script = script.replace(/(\/\/ ITEMS:START\n)[\s\S]*?(\n\/\/ ITEMS:END)/, (_, a, b) => a + block + b);
 script = script.replace(/AUCTION_END_TIME: new Date\('[^']*'\)/, `AUCTION_END_TIME: new Date('${AUCTION.endTime}')`);
 script = script.replace(/MAX_RAISE: \d+/, `MAX_RAISE: ${AUCTION.maxRaise}`);
+if (AUCTION.siteUrl) script = script.replace(/SITE_URL: '[^']*'/, `SITE_URL: '${AUCTION.siteUrl}'`);
 fs.writeFileSync(scriptPath, script);
 
 console.log(`Code.gs updated: ${ITEMS.length} items, closes ${new Date(AUCTION.endTime).toLocaleString('en-US', { timeZone: 'America/New_York' })} Eastern.`);

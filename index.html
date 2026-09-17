@@ -1222,6 +1222,7 @@
         $('sheet').addEventListener('close', () => {
             openIndex = null;
             pendingBid = null;
+            if (location.hash.startsWith('#item=')) history.replaceState(null, '', location.pathname + location.search);
         });
 
         $('sheetImg').addEventListener('error', () => { $('sheetImg').hidden = true; });
@@ -1230,13 +1231,25 @@
         setInterval(() => { if (!document.hidden) fetchBids(); }, POLL_MS);
         document.addEventListener('visibilitychange', () => { if (!document.hidden) fetchBids(); });
 
+        // Links like #item=Item%20Name (used in outbid emails) open that item.
+        function openItemFromHash() {
+            const match = location.hash.match(/^#item=(.+)$/);
+            if (!match) return;
+            let name;
+            try { name = decodeURIComponent(match[1]); } catch (e) { return; }
+            const index = ITEMS.findIndex(item => item.name === name);
+            if (index !== -1 && openIndex !== index) openSheet(index);
+        }
+
+        window.addEventListener('hashchange', openItemFromHash);
+
         renderChrome();
         renderChips();
         renderGrid();
         applyFilters();
         renderCountdown();
         setInterval(renderCountdown, 1000);
-        fetchBids();
+        fetchBids().then(openItemFromHash);
     </script>
 </body>
 </html>

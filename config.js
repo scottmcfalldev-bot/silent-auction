@@ -21,6 +21,9 @@ const AUCTION = {
     // https://script.google.com/macros/s/AKfycbx0lXWFH5Q7ox1j50Xh6QtczQ9dwxpgRWBdKFYX5cE-iZQjmyM7oqzt19K6pt_neG8H/exec
     scriptUrl: '',
 
+    // Public address of this page (used for the "Bid again" link in outbid emails).
+    siteUrl: 'https://scottmcfalldev-bot.github.io/silent-auction/',
+
     orgName: 'Lucy S. Herring Parent Team',
     contactName: 'Mindy Smith',
     contactEmail: 'herringparentteam@gmail.com',

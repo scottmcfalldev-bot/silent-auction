@@ -70,6 +70,12 @@ function by name in the dropdown and press Run:
 - **Send Winner Emails** (`sendWinnerNotifications`) — or send them by hand once bidding has closed.
 - **Export Winners** (`exportWinners`) — writes a Winners tab with names, emails, phones and amounts.
 
-Gmail accounts can send roughly 100 emails a day from Apps Script. Every bid sends one
-confirmation, so a very busy final day could hit that limit; bids are still recorded
-when it does, only the confirmation email is skipped (see the `Error Log` tab).
+## Emails and Gmail's daily limit
+
+Gmail accounts can send roughly 100 emails a day from Apps Script. Every bid sends a
+confirmation, and a bidder who loses their winning spot gets a "You've been outbid" email
+with a link straight back to the item. To keep room for confirmations and the winner
+emails, outbid emails pause for the day once fewer than `OUTBID_EMAIL_RESERVE` (40) sends
+remain — the `Activity Log` tab shows "Outbid Email Skipped" when that happens. Set
+`SEND_OUTBID_EMAILS: false` to turn them off. Bids are always recorded even when an
+email can't be sent (see the `Error Log` tab).

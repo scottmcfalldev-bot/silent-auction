@@ -26,6 +26,13 @@ const CONFIG = {
   MAX_BID_AMOUNT: 1000000,
   HIGH_BID_ALERT: 1000,        // email the admin when a bid reaches this amount
   ENABLE_EMAIL: true,          // set false while testing
+
+  // "You've been outbid" emails. Gmail allows roughly 100 emails a day from a script,
+  // so these stop once fewer than OUTBID_EMAIL_RESERVE sends are left for the day,
+  // keeping room for bid confirmations and the winner emails.
+  SEND_OUTBID_EMAILS: true,
+  OUTBID_EMAIL_RESERVE: 40,
+  SITE_URL: 'https://scottmcfalldev-bot.github.io/silent-auction/',   // link used in emails
   RATE_LIMIT_WINDOW: 5,        // minutes
   RATE_LIMIT_MAX_BIDS: 5,      // max bids per email per window
   ENABLE_LOGGING: true
@@ -173,6 +180,8 @@ function submitBid(params) {
     return { success: false, code: 'BUSY', error: 'Lots of bids are coming in right now. Please try again in a moment.' };
   }
 
+  let outbid = [];
+  let nextMin = 0;
   try {
     const rows = readBids();
 
@@ -205,6 +214,18 @@ function submitBid(params) {
     ]);
     SpreadsheetApp.flush();
     CacheService.getScriptCache().remove(CACHE_KEY);
+
+    // Anyone who was winning before this bid and isn't any more has been outbid.
+    const before = getWinningBids(bid.itemName, rows);
+    rows.push({
+      timestamp: bid.timestamp.getTime(), fullName: bid.fullName, email: bid.email,
+      phone: bid.phone, amount: bid.bidAmount, itemName: bid.itemName, bidId: bid.bidId
+    });
+    const stillWinning = getWinningBids(bid.itemName, rows).map(function (row) { return row.email; });
+    outbid = before.filter(function (row) {
+      return row.email !== bid.email && stillWinning.indexOf(row.email) === -1;
+    });
+    nextMin = getBidRange(bid.itemName, rows).min;
   } finally {
     lock.releaseLock();
   }
@@ -216,6 +237,14 @@ function submitBid(params) {
       // The bid is saved; a failed email shouldn't fail the bid.
       logError(emailError, 'sendConfirmationEmail', { email: bid.email });
     }
+
+    outbid.forEach(function (row) {
+      try {
+        sendOutbidEmail(row, nextMin);
+      } catch (emailError) {
+        logError(emailError, 'sendOutbidEmail', { email: row.email });
+      }
+    });
   }
 
   logActivity('Bid Submitted', { email: bid.email, item: bid.itemName, amount: bid.bidAmount });
@@ -388,6 +417,42 @@ function sendConfirmationEmail(bid) {
       body: 'A high-value bid has been placed:\n\nItem: ' + bid.itemName + '\nAmount: $' + bid.bidAmount + '\nBidder: ' + bid.fullName + '\nEmail: ' + bid.email
     });
   }
+}
+
+// Tells a bidder they've lost their winning spot. `row` is their bid from the Bids tab.
+function sendOutbidEmail(row, nextMin) {
+  if (!CONFIG.SEND_OUTBID_EMAILS || !isAuctionOpen()) return;
+  if (MailApp.getRemainingDailyQuota() < CONFIG.OUTBID_EMAIL_RESERVE) {
+    logActivity('Outbid Email Skipped (daily email quota low)', { email: row.email, item: row.itemName });
+    return;
+  }
+
+  const link = CONFIG.SITE_URL + '#item=' + encodeURIComponent(row.itemName);
+  const closes = formatTime(CONFIG.AUCTION_END_TIME);
+
+  const htmlBody = emailShell("You've been outbid", escapeHtml(row.itemName),
+    '<p style="font-size: 16px;">Hi ' + escapeHtml(row.fullName) + ',</p>' +
+    '<p style="font-size: 16px;">Someone just topped your $' + row.amount + ' bid on <strong>' + escapeHtml(row.itemName) + '</strong>.</p>' +
+    '<div style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">' +
+      '<p style="margin: 0; font-size: 14px; color: #697D83;">To get back in, bid at least</p>' +
+      '<p style="margin: 4px 0 16px; font-size: 28px; font-weight: bold; color: #6E8348;">$' + nextMin + '</p>' +
+      '<a href="' + link + '" style="display: inline-block; background: #E59F2B; color: white; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 16px;">Bid again</a>' +
+    '</div>' +
+    '<p style="font-size: 15px; color: #697D83;">Bidding closes ' + closes + '. Every dollar supports ' + escapeHtml(CONFIG.ORG_NAME) + '.</p>'
+  );
+
+  const textBody =
+    'Hi ' + row.fullName + ',\n\nSomeone just topped your $' + row.amount + ' bid on ' + row.itemName + '.\n\n' +
+    'To get back in, bid at least $' + nextMin + ':\n' + link + '\n\n' +
+    'Bidding closes ' + closes + '.\n\n' + CONFIG.ORG_NAME + ' Silent Auction Team';
+
+  MailApp.sendEmail({
+    to: row.email,
+    subject: "You've been outbid on " + row.itemName,
+    body: textBody,
+    htmlBody: htmlBody
+  });
+  logActivity('Outbid Email Sent', { email: row.email, item: row.itemName, nextMin: nextMin });
 }
 
 // Everyone currently winning something: email -> { name, items: [{itemName, bidAmount, position}] }
