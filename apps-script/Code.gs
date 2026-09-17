@@ -8,6 +8,10 @@
 // CONFIGURATION — update these each year
 // ============================================
 const CONFIG = {
+  // The ID from this year's Sheet URL (docs.google.com/spreadsheets/d/<ID>/edit).
+  // Leave '' only if this script was opened from the Sheet's Extensions menu.
+  SPREADSHEET_ID: '15gr04ZUgxbXddl-oWQydj6K8_SHFIHDVpmMfCl94wwg',
+
   // Must match endTime in config.js. Keep the timezone offset on the end
   // (-05:00 = Eastern Standard Time, -04:00 = Eastern Daylight Time).
   AUCTION_END_TIME: new Date('2026-12-06T21:00:00-05:00'),
@@ -302,8 +306,14 @@ function sanitizeInput(input) {
 // HELPERS
 // ============================================
 
+function getSpreadsheet() {
+  return CONFIG.SPREADSHEET_ID
+    ? SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID)
+    : SpreadsheetApp.getActiveSpreadsheet();
+}
+
 function getBidsSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSpreadsheet();
   return ss.getSheetByName(BIDS_SHEET) || initializeSheets();
 }
 
@@ -542,7 +552,7 @@ function sendAdminWinnerSummary(winners, emailsSent, errors) {
 function logActivity(action, details) {
   if (!CONFIG.ENABLE_LOGGING) return;
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getSpreadsheet();
     let logSheet = ss.getSheetByName('Activity Log');
     if (!logSheet) {
       logSheet = ss.insertSheet('Activity Log');
@@ -556,7 +566,7 @@ function logActivity(action, details) {
 
 function logError(error, context, additionalInfo) {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getSpreadsheet();
     let errorSheet = ss.getSheetByName('Error Log');
     if (!errorSheet) {
       errorSheet = ss.insertSheet('Error Log');
@@ -573,7 +583,7 @@ function logError(error, context, additionalInfo) {
 // ============================================
 
 function initializeSheets() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSpreadsheet();
 
   let bidsSheet = ss.getSheetByName(BIDS_SHEET);
   if (!bidsSheet) {
@@ -595,7 +605,7 @@ function initializeSheets() {
 }
 
 function exportWinners() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSpreadsheet();
   const name = 'Winners ' + Utilities.formatDate(new Date(), CONFIG.TIMEZONE, 'yyyy-MM-dd HH.mm.ss');
   const sheet = ss.insertSheet(name);
   sheet.appendRow(['Item Name', 'Winning Bid', 'Winner Name', 'Email', 'Phone', 'Position']);

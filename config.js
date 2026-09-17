@@ -17,7 +17,7 @@ const AUCTION = {
 
     // The /exec URL of this year's Apps Script deployment.
     // Leave empty to run the page in demo mode (bids stay in the browser).
-    scriptUrl: '',
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbx0lXWFH5Q7ox1j50Xh6QtczQ9dwxpgRWBdKFYX5cE-iZQjmyM7oqzt19K6pt_neG8H/exec',
 
     orgName: 'Lucy S. Herring Parent Team',
     contactName: 'Mindy Smith',

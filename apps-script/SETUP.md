@@ -13,15 +13,22 @@ node tools/sync-script-items.js
 ```
 
 That copies the item list, end time and max raise into `apps-script/Code.gs`.
-Check the other values at the top of `Code.gs` by hand: `ADMIN_EMAIL`,
-`CONTACT_NAME`, `CONTACT_EMAIL`.
+Check the other values at the top of `Code.gs` by hand: `SPREADSHEET_ID`
+(the long ID in this year's Sheet URL), `ADMIN_EMAIL`, `CONTACT_NAME`, `CONTACT_EMAIL`.
+
+To copy the file to the clipboard without mangling the — and ’ characters:
+
+```bash
+LANG=en_US.UTF-8 pbcopy < apps-script/Code.gs
+```
 
 ## 2. Create the Sheet and script
 
 1. Go to [sheets.new](https://sheets.new) and name it e.g. "LSH Silent Auction 2026".
 2. **Extensions → Apps Script**.
 3. Delete whatever is in the editor, paste in all of `apps-script/Code.gs`, and save.
-4. In the function dropdown pick **initializeSheets** and press **Run**. Approve the
+4. In the function dropdown pick **initializeSheets** (check the toolbar really shows
+   it, not `doGet`) and press **Run**. Approve the
    permissions prompt (it needs the Sheet, and to send email as you). This creates the
    `Bids` and `Current Bids` tabs.
 
@@ -52,12 +59,16 @@ Editing the existing deployment keeps the same URL. Don't rename an item once it
 
 ## When the auction ends
 
-Use the **Auction Admin** menu in the Sheet (reload the Sheet if you don't see it):
+Use the **Auction Admin** menu in the Sheet (reload the Sheet if you don't see it).
+The menu only appears when the script was created from the Sheet's Extensions menu.
+The 2026 script is a standalone project ("LSH Auction 2026" at script.google.com) that
+finds the Sheet by `SPREADSHEET_ID`, so instead open the script editor, pick the
+function by name in the dropdown and press Run:
 
-- **Setup Auto-Send at Auction End** — run this any time before closing to have winner
+- **Setup Auto-Send at Auction End** (`setupAuctionEndTrigger`) — run this any time before closing to have winner
   emails go out automatically at the end time.
-- **Send Winner Emails** — or send them by hand once bidding has closed.
-- **Export Winners** — writes a Winners tab with names, emails, phones and amounts.
+- **Send Winner Emails** (`sendWinnerNotifications`) — or send them by hand once bidding has closed.
+- **Export Winners** (`exportWinners`) — writes a Winners tab with names, emails, phones and amounts.
 
 Gmail accounts can send roughly 100 emails a day from Apps Script. Every bid sends one
 confirmation, so a very busy final day could hit that limit; bids are still recorded
