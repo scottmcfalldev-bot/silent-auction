@@ -476,7 +476,7 @@
                 </div>
             </details>
 
-            <div class="demo-banner" id="demoBanner" hidden><strong>Demo mode.</strong> No backend is connected, so bids stay in this browser tab and disappear on reload.</div>
+            <div class="demo-banner" id="demoBanner" hidden><strong>Preview.</strong> Bidding isn't open yet. Feel free to try placing a bid to see how it works &mdash; nothing is saved or sent.</div>
         </section>
 
         <section class="filters" aria-label="Find items">
@@ -1125,7 +1125,8 @@
 
         // Stand-in for the Apps Script backend when no scriptUrl is set (or ?demo is in the URL).
         const demoBackend = {
-            rows: [
+            // Sample bids, only with ?demo in the URL, so the preview starts clean.
+            rows: !new URLSearchParams(location.search).has('demo') ? [] : [
                 { itemName: ITEMS[0]?.name, bidAmount: ITEMS[0]?.startingBid + 10, phone: '8285550142', email: 'a@example.com' },
                 { itemName: ITEMS[2]?.name, bidAmount: ITEMS[2]?.startingBid, phone: '8285559731', email: 'b@example.com' },
                 ...ITEMS.filter(item => quantityOf(item) > 1).slice(0, 2).flatMap(item => [
