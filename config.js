@@ -13,7 +13,7 @@ const AUCTION = {
 
     // Closing time WITH a timezone offset (-05:00 = Eastern Standard Time,
     // -04:00 = Eastern Daylight Time). Must match AUCTION_END_TIME in Code.gs.
-    endTime: '2026-12-06T21:00:00-05:00',
+    endTime: '2026-12-10T23:59:59-05:00',
 
     // The /exec URL of this year's Apps Script deployment.
     // Leave empty to run the page in demo mode (bids stay in the browser).

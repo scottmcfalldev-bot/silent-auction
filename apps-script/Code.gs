@@ -14,7 +14,7 @@ const CONFIG = {
 
   // Must match endTime in config.js. Keep the timezone offset on the end
   // (-05:00 = Eastern Standard Time, -04:00 = Eastern Daylight Time).
-  AUCTION_END_TIME: new Date('2026-12-06T21:00:00-05:00'),
+  AUCTION_END_TIME: new Date('2026-12-10T23:59:59-05:00'),
 
   ADMIN_EMAIL: 'scottmcfalldev@gmail.com',     // gets high-bid alerts + the winner summary
   ORG_NAME: 'Lucy S. Herring Parent Team',     // used in emails

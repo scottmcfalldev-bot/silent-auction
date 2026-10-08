@@ -10,6 +10,16 @@ A static auction page (`index.html`) backed by a Google Sheet via Apps Script.
 | `Images/` → `img/` | Full-size originals → phone-sized copies made by `tools/optimize-images.sh` |
 | `tools/sync-script-items.js` | Copies items + end time from `config.js` into `Code.gs` |
 
+## 2026 schedule
+
+| Date | What happens |
+| --- | --- |
+| Now – Sun 11/22 | Promotions for donations |
+| Fri 11/27 (Black Friday) | Bidding goes live (paste the `/exec` URL into `scriptUrl` and push) |
+| Thu 12/10, 11:59:59 PM ET | Bidding closes (`endTime`) |
+| Fri 12/11 | Winners notified, payment instructions (PayPal link) sent |
+| Fri 12/18 | Everything wrapped: winners paid, items picked up |
+
 ## Yearly checklist
 
 1. Put new item photos in `Images/` and run `./tools/optimize-images.sh`.
