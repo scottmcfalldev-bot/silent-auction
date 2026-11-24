@@ -69,7 +69,7 @@ const ITEMS = [
         name: 'Free Week of Ultimate Frisbee Summer Camp',
         category: 'Kids & Family',
         startingBid: 50,
-        image: 'img/placeholder.svg',
+        image: 'img/ultimate-frisbee-4-mark-strazzer.jpg',
         description: 'One free week of Ultimate Frisbee Summer Camp. Donated by Mark Strazzer, Ultimate Frisbee Summer Camp. The winner is connected with Mark to register.',
     },
     {
