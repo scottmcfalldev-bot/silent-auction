@@ -1,5 +1,10 @@
 # Log
 
+## 2026-11-24 · LSH auction 2026: real items from donation form
+- **Done:** Replaced the sample listings in `config.js` with 28 donations from the donation-form sheet plus the AI consultation (29 items), photos pulled from Drive into `Images/` and `img/`, `Code.gs` re-synced. Card photos now fit whole inside a fixed 4:3 frame (logos no longer cropped). Scott's item renamed "Small Business Workflow Consultation" and moved to first, with a new "Workflow Fix" listing image (`img/scott-workflow.jpg`, background removed with rembg) and a rewritten description. Drafted an update email to Mindy with the open questions below. Donor personal emails kept off the page. Not committed.
+- **Waiting on:** Mindy: Oowee Products item (still "pending" in the sheet); a working photo for Ultimate Frisbee camp (Drive file not found, placeholder shown); confirm Biltmore start at $240 (donor's number, likely full value); how the 5 one-of-a-kind Mo Talbert paintings get assigned to the 5 winners.
+- **Next:** Scott: commit/push; re-paste `Code.gs` and redeploy before bidding opens Fri 11/27, then set `scriptUrl`.
+
 ## 2026-10-08 · LSH auction 2026: pushed schedule, Asana task
 - **Done:** Schedule change committed and pushed to `2026` (`73882f1`), closing time Thu 12/10 at 11:59:59 PM ET. Drafted a note for Mindy covering the plan and what we need from her. Asana task for the Apps Script redeploy created, due Fri 2026-10-09: https://app.asana.com/1/1211366034618669/project/1211500018600590/task/1219340631379903
 - **Waiting on:** Mindy: item list, PayPal details, pickup plan (once Scott sends the note).

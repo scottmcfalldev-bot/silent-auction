@@ -184,9 +184,9 @@
 
         .card:hover { border-color: #c3cba5; box-shadow: 0 4px 14px rgba(38, 48, 47, 0.08); }
 
-        .card-photo { position: relative; width: 100%; aspect-ratio: 4 / 3; background: var(--green-tint); }
+        .card-photo { position: relative; overflow: hidden; width: 100%; aspect-ratio: 4 / 3; background: var(--green-tint); }
 
-        .card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .card-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; display: block; }
 
         .badge {
             position: absolute;
