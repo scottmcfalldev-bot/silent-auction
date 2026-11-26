@@ -46,7 +46,7 @@ const ITEMS = [
     {
         name: 'Biltmore Daytime Admission for Two',
         category: 'Experiences',
-        startingBid: 240,
+        startingBid: 75,
         image: 'img/biltmore-2.jpg',
         description: 'Two daytime admission tickets to Biltmore, sold as a pair. Donated by Biltmore (biltmore.com).',
     },
@@ -62,8 +62,8 @@ const ITEMS = [
         category: 'Kids & Family',
         startingBid: 40,
         quantity: 4,
-        image: 'img/ttrpg.jpg',
-        description: 'An intro to tabletop role-playing games plus a one-shot adventure for 2 to 8 players, ages 10+ (plan on 3+ hours). Every player takes home the Cairn 2nd Edition Player\'s Guide and Warden\'s Guide, everything you need to run your own adventures. Donated by Ryan Nuckolls. Winners are connected with Ryan to schedule.',
+        image: 'img/mausritter.jpg',
+        description: 'An intro to tabletop role-playing games plus a one-shot adventure for 2 to 8 players, ages 10+ (plan on 3+ hours). Every player takes home a spiral-bound Mausritter rulebook, character sheets, item cards and a dice set: everything you need to run your own adventures. Donated by Ryan Nuckolls. Winners are connected with Ryan to schedule.',
     },
     {
         name: 'Free Week of Ultimate Frisbee Summer Camp',
@@ -121,7 +121,7 @@ const ITEMS = [
         category: 'Health & Fitness',
         startingBid: 30,
         image: 'img/blue-ghost.jpg',
-        description: 'One month of unlimited membership at Blue Ghost Strength + Yoga. Donated by Sara Toohey, Blue Ghost Strength + Yoga (blueghostavl.com).',
+        description: 'One month of unlimited membership at Blue Ghost Strength + Yoga (a $150 value). Donated by Sara Toohey, Blue Ghost Strength + Yoga (blueghostavl.com).',
     },
     {
         name: 'Virtual Nutrition Consultation with Dr. Kate Dwyer',
@@ -135,7 +135,7 @@ const ITEMS = [
         category: 'Health & Fitness',
         startingBid: 50,
         image: 'img/dietitian-consult.jpg',
-        description: 'A one-hour consultation with a registered dietitian. Donated by Jen Cannon. The winner gets Jen\'s contact info to schedule.',
+        description: 'A one-hour consultation with Jen Cannon, MS, RDN, LDN. With over 17 years of experience, Jen specializes in adult clinical nutrition: diabetes, heart health, hypertension, stroke, weight management, oncology and IBS/IBD. She can help you get on track with your health journey! The winner gets Jen\'s contact info. Learn more about Jen: signup.nourish.com/providers/jennifer-cannon',
     },
     {
         name: 'Small Engine Service Call',
@@ -155,7 +155,7 @@ const ITEMS = [
     {
         name: 'Lasagna Dinner for Six',
         category: 'Food & Drink',
-        startingBid: 60,
+        startingBid: 20,
         image: 'img/lasagna.jpg',
         description: 'A homemade lasagna dinner for six, meat or vegetarian, your pick. Delivered to your home by the donor, Cassie Howe.',
     },
@@ -188,6 +188,13 @@ const ITEMS = [
         description: 'Two bottles of sparkling wine, ready for the holidays. Donated by Cara Fuseler. Winner must be 21+.',
     },
     {
+        name: 'Oowee Leather Gift Pack',
+        category: 'Gifts & Gear',
+        startingBid: 30,
+        image: 'img/oowee.jpg',
+        description: 'A locally made leather gift pack from Oowee Products: two leather stubby-bottle sleeves, a leather coaster holder set and an American flag stamp hat. Donated by Oowee Products (ooweeproducts.com).',
+    },
+    {
         name: 'Goat Milk Soap from Woodland Hills Farm',
         category: 'Gifts & Gear',
         startingBid: 10,
@@ -203,14 +210,14 @@ const ITEMS = [
     },
     {
         name: 'Holiday Cards, Set 1',
-        category: 'Holiday',
+        category: 'Art & Handmade',
         startingBid: 10,
         image: 'img/holiday-cards-a.jpg',
         description: 'Five folded holiday cards (6 x 4.5 in, blank inside, with envelopes): digital design, inkjet print, watercolor and paint pen on heavy watercolor paper. Donated by Paige Taylor, Rhododendron Press (Instagram @rhododendron.press).',
     },
     {
         name: 'Holiday Cards, Set 2',
-        category: 'Holiday',
+        category: 'Art & Handmade',
         startingBid: 10,
         image: 'img/holiday-cards-b.jpg',
         description: 'Five folded holiday cards (6 x 4.5 in, blank inside, with envelopes): digital design, inkjet print, watercolor and paint pen on heavy watercolor paper. Donated by Paige Taylor, Rhododendron Press (Instagram @rhododendron.press).',

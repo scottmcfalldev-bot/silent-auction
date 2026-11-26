@@ -19,7 +19,10 @@ const CONFIG = {
   ADMIN_EMAIL: 'scottmcfalldev@gmail.com',     // gets high-bid alerts + the winner summary
   ORG_NAME: 'Lucy S. Herring Parent Team',     // used in emails
   CONTACT_NAME: 'Mindy Smith',                 // who winners hear from about payment/pickup
-  CONTACT_EMAIL: 'herringparentteam@gmail.com',
+  CONTACT_EMAIL: 'herringparentteam@gmail.com',   // also gets the winner summary
+  // PayPal link winners use to pay. Leave '' and the winner email just says
+  // Mindy will be in touch about payment.
+  PAYPAL_URL: 'https://www.paypal.com/donate/?hosted_button_id=PQMZK3L82BQH2',
   TIMEZONE: 'America/New_York',                // for times shown in emails
 
   MAX_RAISE: 100,              // a bid can't be more than this above the current bid
@@ -43,7 +46,7 @@ const CONFIG = {
 // ITEMS:START
 const ITEMS = {
   "Small Business Workflow Consultation": { startingBid: 30, quantity: 1 },
-  "Biltmore Daytime Admission for Two": { startingBid: 240, quantity: 1 },
+  "Biltmore Daytime Admission for Two": { startingBid: 75, quantity: 1 },
   "The Orange Peel or Hellbender: 2 Show Tickets": { startingBid: 25, quantity: 1 },
   "Tabletop Role-Playing Game Session": { startingBid: 40, quantity: 4 },
   "Free Week of Ultimate Frisbee Summer Camp": { startingBid: 50, quantity: 1 },
@@ -58,11 +61,12 @@ const ITEMS = {
   "1-Hour Registered Dietitian Consult": { startingBid: 50, quantity: 1 },
   "Small Engine Service Call": { startingBid: 100, quantity: 2 },
   "Hand Screen Printing: Up to 20 Pieces": { startingBid: 50, quantity: 1 },
-  "Lasagna Dinner for Six": { startingBid: 60, quantity: 1 },
+  "Lasagna Dinner for Six": { startingBid: 20, quantity: 1 },
   "NC Cookbook with Homemade Blueberry Jam": { startingBid: 20, quantity: 1 },
   "Four California Wines": { startingBid: 60, quantity: 1 },
   "Six Wines: Three Red, Three White": { startingBid: 60, quantity: 1 },
   "Two Bottles of Sparkling Wine": { startingBid: 40, quantity: 1 },
+  "Oowee Leather Gift Pack": { startingBid: 30, quantity: 1 },
   "Goat Milk Soap from Woodland Hills Farm": { startingBid: 10, quantity: 1 },
   "Handmade Pinecone Wreath": { startingBid: 30, quantity: 1 },
   "Holiday Cards, Set 1": { startingBid: 10, quantity: 1 },
@@ -518,7 +522,11 @@ function sendWinnerNotifications() {
 function sendWinnerEmail(email, fullName, items) {
   const total = items.reduce(function (sum, item) { return sum + item.bidAmount; }, 0);
   const plural = items.length > 1;
-  const nextSteps = 'Be on the lookout for an email from ' + CONFIG.CONTACT_NAME + ' (' + CONFIG.CONTACT_EMAIL + ') to coordinate payment and item pickup.';
+  const payStep = CONFIG.PAYPAL_URL
+    ? 'Please pay your total of $' + total + ' through PayPal (enter $' + total + ' as the amount): ' + CONFIG.PAYPAL_URL
+    : 'Be on the lookout for an email from ' + CONFIG.CONTACT_NAME + ' (' + CONFIG.CONTACT_EMAIL + ') about payment.';
+  const deliveryStep = 'Once your payment comes through, ' + CONFIG.CONTACT_NAME + ' (' + CONFIG.CONTACT_EMAIL + ') will reach out to get your ' + (plural ? 'items' : 'item') + ' to you: a pickup or drop-off, an introduction to the donor, or an emailed gift certificate.';
+  const nextSteps = payStep + '\n\n' + deliveryStep;
 
   const itemsHtml = items.map(function (item) {
     return '<div style="background: white; padding: 18px; border-radius: 10px; margin: 12px 0; border-left: 4px solid #6E8348;">' +
@@ -538,7 +546,11 @@ function sendWinnerEmail(email, fullName, items) {
     '</div>' +
     '<div style="background: #fdf3df; padding: 18px; border-radius: 10px; border-left: 4px solid #E59F2B; margin: 24px 0;">' +
       '<h3 style="margin: 0 0 8px;">Next steps: payment &amp; pickup</h3>' +
-      '<p style="margin: 0; font-size: 16px;">' + escapeHtml(nextSteps) + '</p>' +
+      (CONFIG.PAYPAL_URL
+        ? '<p style="margin: 0 0 14px; font-size: 16px;">Please pay your total of $' + total + ' through PayPal. Enter <strong>$' + total + '</strong> as the amount on the PayPal page.</p>' +
+          '<p style="margin: 0 0 14px;"><a href="' + escapeHtml(CONFIG.PAYPAL_URL) + '" style="display: inline-block; background: #6E8348; color: white; padding: 12px 22px; border-radius: 8px; text-decoration: none; font-weight: bold;">Pay $' + total + ' with PayPal</a></p>'
+        : '<p style="margin: 0 0 14px; font-size: 16px;">' + escapeHtml(payStep) + '</p>') +
+      '<p style="margin: 0; font-size: 16px;">' + escapeHtml(deliveryStep) + '</p>' +
     '</div>' +
     '<p style="font-size: 16px;">Thank you for supporting ' + escapeHtml(CONFIG.ORG_NAME) + '. Your generosity makes a real difference.</p>'
   );
@@ -586,7 +598,7 @@ function sendAdminWinnerSummary(winners, emailsSent, errors) {
   summary += '\nTOTAL AUCTION REVENUE: $' + totalRevenue + '\n';
 
   MailApp.sendEmail({
-    to: CONFIG.ADMIN_EMAIL,
+    to: CONFIG.ADMIN_EMAIL + ',' + CONFIG.CONTACT_EMAIL,
     subject: 'Auction complete - winner notifications sent (' + emailsSent + ' emails)',
     body: summary
   });
