@@ -589,7 +589,9 @@
     <script>
         // Items, dates and the backend URL live in config.js.
         const END_TIME = new Date(AUCTION.endTime);
-        const DEMO = !AUCTION.scriptUrl || new URLSearchParams(location.search).has('demo');
+        const START_TIME = AUCTION.startTime ? new Date(AUCTION.startTime) : null;
+        const NOT_STARTED = !!START_TIME && Date.now() < START_TIME.getTime();
+        const DEMO = !AUCTION.scriptUrl || NOT_STARTED || new URLSearchParams(location.search).has('demo');
         const POLL_MS = 15000;
 
         const $ = id => document.getElementById(id);
@@ -703,6 +705,10 @@
             $('contactLink').textContent = AUCTION.contactEmail;
             $('contactLink').href = 'mailto:' + AUCTION.contactEmail;
             $('demoBanner').hidden = !DEMO;
+            if (NOT_STARTED && AUCTION.scriptUrl) {
+                const opens = START_TIME.toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+                $('demoBanner').innerHTML = `<strong>Preview.</strong> Bidding opens ${opens} Eastern. Feel free to try placing a bid to see how it works &mdash; nothing is saved or sent until then.`;
+            }
         }
 
         let wasOpen = true;
@@ -1249,6 +1255,10 @@
         applyFilters();
         renderCountdown();
         setInterval(renderCountdown, 1000);
+        // Reload into live mode when bidding opens (only on the real page, not ?demo).
+        if (NOT_STARTED && AUCTION.scriptUrl && !new URLSearchParams(location.search).has('demo')) {
+            setTimeout(() => location.reload(), Math.min(START_TIME.getTime() - Date.now() + 1500, 2147483000));
+        }
         fetchBids().then(openItemFromHash);
     </script>
 </body>

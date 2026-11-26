@@ -15,11 +15,16 @@ const AUCTION = {
     // -04:00 = Eastern Daylight Time). Must match AUCTION_END_TIME in Code.gs.
     endTime: '2026-12-10T23:59:59-05:00',
 
+    // When bidding opens. Before this the page stays in preview mode (bids aren't
+    // saved), then switches to live by itself. Leave '' to go live as soon as
+    // scriptUrl is set.
+    startTime: '2026-11-27T00:00:00-05:00',
+
     // The /exec URL of this year's Apps Script deployment.
     // Leave empty to run the page in demo mode (bids stay in the browser).
     // 2026 deployment (paste into scriptUrl to go live):
     // https://script.google.com/macros/s/AKfycbx0lXWFH5Q7ox1j50Xh6QtczQ9dwxpgRWBdKFYX5cE-iZQjmyM7oqzt19K6pt_neG8H/exec
-    scriptUrl: '',
+    scriptUrl: 'https://script.google.com/macros/s/AKfycbx0lXWFH5Q7ox1j50Xh6QtczQ9dwxpgRWBdKFYX5cE-iZQjmyM7oqzt19K6pt_neG8H/exec',
 
     // Public address of this page (used for the "Bid again" link in outbid emails).
     siteUrl: 'https://scottmcfalldev-bot.github.io/silent-auction/',
