@@ -2,6 +2,8 @@
 
 A static auction page (`index.html`) backed by a Google Sheet via Apps Script.
 
+2026 page: https://scottmcfalldev-bot.github.io/silent-auction/ (short link to share: https://bit.ly/LSH2026)
+
 | File | What it is |
 | --- | --- |
 | `config.js` | **The file you edit each year**: year, closing time, backend URL, items |
